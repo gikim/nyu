@@ -1,0 +1,12 @@
+*husband code:
+cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+
+use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+*men
+keep if sex == 1
+*married
+tab us80a_marst
+keep if us80a_marst == 1
+tab us80a_chborn
+*NIU 
+
