@@ -1,12 +1,226 @@
-*husband code:
+*replication
+*working directory 
 cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
-
+*load data
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
-*men
-keep if sex == 1
-*married
+*summary statistics 
+tab sex
+
+tab us80a_agemarr
+sum us80a_agemarr if us80a_agemarr == 1
+
 tab us80a_marst
-keep if us80a_marst == 1
+sum us80a_marst if us80a_marst == 1
+
+*mother location
+tab us80a_momloc
+
+*linking parent
+tab parrule
+sum parrule if parrule == 3
+
+
+tab us80a_marrno
+sum us80a_marrno if us80a_marrno == 1
+tab us80a_chborn
+sum us80a_chborn if us80a_chborn == 0
+sum us80a_chborn if us80a_chborn == 3
+sum us80a_chborn if us80a_chborn >= 3
+
+tab momloc 
+tab sex
+tab us80a_sploc
+tab us80a_nchild
+sum us80a_nchild if us80a_nchild == 0
+tab us80a_chborn
+tab us80a_age
+tab us80a_momrule
+sum us80a_momrule if us80a_momrule == 0
+sum us80a_momrule if us80a_momrule == 1
+browse if us80a_serial == 1
+tab us80a_pernum
+tab us80a_momloc
+
 tab us80a_chborn
 *NIU 
+tab us80a_widow 
+sum us80a_widow if us80a_widow == 0
+sum us80a_widow if us80a_widow == 1
+sum us80a_widow if us80a_widow == 2
+
+*preserve
+*file with women, age 21-35, 2+ children  
+*keep commands
+*load data
+use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+keep if sex == 2
+*age < 60
+*keep if age <= 60
+*age < 35, > 21
+keep if age <= 35
+keep if age >= 21
+*2 or more children 
+keep if us80a_chborn >= 2
+save mom, replace
+********************************************************************************************************
+********************************************************************************************************
+*file with married men
+use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+keep if sex == 1
+*married
+keep if us80a_marst == 1
+*not a widow
+keep if us80a_widow != 2
+save dad.dta, replace
+********************************************************************************************************
+********************************************************************************************************
+* file with children
+use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+*identify children 
+keep if age <= 17
+keep if us80a_momrule == 1
+keep if us80a_chborn == 0
+keep if us80a_agemarr == 0
+keep if us80a_nchild == 0
+
+sort us80a_serial
+*keep us80a_serial us80a_pernum us80a_sex us80a_age us80a_sex us80a_momloc momloc parrule us80a_momrule
+*keep us80a_serial us80a_pernum us80a_momloc us80a_age us80a_sex
+*sort us80a_serial us80a_age us80a_pernum us80a_momloc 
+*sort stateus us80a_serial momloc parrule age sex us80a_pernum us80a_momrule
+keep stateus us80a_serial momloc parrule age sex us80a_pernum us80a_momrule
+
+*generate negative the by age in descending order 
+gen ageneg = age*(-1) 
+sort us80a_serial ageneg
+capture drop child
+bys us80a_serial: gen childnum = _n
+browse us80a_serial age ageneg child
+
+save child, replace
+********************************************************************************************************
+*child file, reshape
+use child, clear
+*reshape wide us80a_sex us80a_age us80a_momloc, i(us80a_serial) j(us80a_pernum) 
+reshape wide stateus momloc parrule age sex us80a_pernum us80a_momrule ageneg, i(us80a_serial) j(childnum) 
+
+*only households w/ 2+ children 
+*drop if us80a_age2 == .
+drop if age2 == .
+
+*same gender
+*gen same = 1 if us80a_sex1 == us80a_sex2
+gen same = 1 if sex1 == sex2
+replace same = 0 if same == .
+*first two children, both girls 
+*gen bothgirl = 1 if us80a_sex1 == 2 & us80a_sex2 == 2
+gen bothgirl = 1 if sex1 == 2 & sex2 == 2
+replace bothgirl = 0 if bothgirl == .
+*first two children, both boys
+*gen bothboy = 1 if us80a_sex1 == 1 & us80a_sex2 == 1
+gen bothboy = 1 if sex1 == 1 & sex2 == 1
+replace bothboy = 0 if bothboy == . 
+
+*gen twin = 1 if us80a_age1 == us80a_age2
+gen twin = 1 if age1 == age2
+replace twin = 0 if twin == .
+
+tab same bothgirl
+tab same bothboy
+tab bothgirl bothboy
+tab twin 
+
+save child-reshape1, replace
+save child-reshape2, replace
+********************************************************************************************************
+********************************************************************************************************
+********************************************************************************************************
+
+*merge mom with child dataset
+use mom, clear
+merge m:1 us80a_serial using child-reshape1.dta
+keep if _merge == 3
+
+*check first two children have the same mom 
+*gen samemom = 1 if us80a_momloc1 == us80a_momloc2
+gen samemom = 1 if momloc1 == momloc2 
+*check first three children have the same mom, if there is a third child
+capture drop samemom3
+gen samemom3 = 1 if momloc1 == momloc2 == momloc3 & momloc3 != .
+
+*make sure that the momloc for the children matches with the mom's person number in the household 
+*gen rightmom = 1 if us80a_pernum == us80a_momloc1 & us80a_pernum == us80a_momloc2
+gen rightmom = 1 if us80a_pernum == momloc1 & us80a_pernum == momloc2
+
+*check that the first two children have the same mom AND linked to the same mom in the mom dataset. 
+gen mom2 = 1 if us80a_pernum == momloc1 & us80a_pernum == momloc2 & momloc1 == momloc2
+
+rename samemom mom0
+rename rightmom mom1
+
+*keep only moms with no mother link, momrule == 0 
+keep if us80a_momrule == 0
+*keep only households with right mom and same mom 
+keep if mom2 == 1
+*drop both
+
+save merge, replace
+
+********************************************************************************************************
+*merge mom with dad dataset
+
+*link married women to husbands 
+*husband code:
+
+use merge, clear
+sort us80a_serial
+merge 1:1 
+
+*married file: women with at least one child living with their husband who are less than age 60, children 17 or younger 
+*with mothers
+
+
+*married
+keep if us80a_marst == 1
+keep if us80a_marrno == 1
+
+
+
+********************************************************************************************************
+
+
+* replicate table 2
+
+keep if age <=35
+keep if age >=21
+
+*more than two children 
+gen two = 1 if us80a_pernum3 != .
+replace two = 0 if two == .
+gen boy1 = 1 if us80a_sex1 == 1
+replace boy1 = 0 if boy1 == .
+gen boy2 = 1 if us80a_sex2 == 1
+replace boy2 = 0 if boy2 == .
+save merge1, replace
+
+* age of mother at birth of first child 
+gen agefirstchild = age - childage1
+
+* replicate table 2, column 2
+
+sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin us80a_age 
+sum us80a_wkswork1 us80a_uhrswork 
+sum us80a_qwkswork us80a_incwage
+
+
+*stateus us80a_pernum us80a_serial us80a_statefip us80a_ftotinc 
+
+*collapse (us80a_pernum us80a_nchild us80a_age us80a_marst us80a_agemarr)
+
+* replicate
+table 2
+table 6
+table 7 
+
+
 
