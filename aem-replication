@@ -273,19 +273,20 @@ replace married = 0 if us80a_marrno!=1
 replace married = 1 if married == .
 tab married
 save momchilddad.dta, replace
+
+*dataset to use for analyses
 ********************************************************************************************************
 ********************************************************************************************************
+
 ********************************************************************************************************
 ********************************************************************************************************
+
+use momchilddad.dta, clear
 
 
 
 
 * replicate table 2
-
-keep if age <=35
-keep if age >=21
-
 *more than two children 
 gen two = 1 if us80a_pernum3 != .
 replace two = 0 if two == .
