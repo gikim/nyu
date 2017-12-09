@@ -1,0 +1,43 @@
+*2017-12-04 
+*lab session 
+
+log using lab8
+use "D:\GIKIM\ECON-GA-1011-STATS\LAB\Lab8-Price1m.dta", clear
+do "D:\GIKIM\ECON-GA-1011-STATS\LAB\Lab8-1.do"
+log close
+
+*test for heteroscedasticity 
+first use extended
+estat hettest
+estat hettest, iid 
+
+* White test vs. breusch-pagan test
+* White test: more likely to have type II error. 
+* Typical mistake with y test: 
+* second stage regression 
+* cross products of the dummy variables - multicollinearity 
+* huge model, 88 observations 
+
+
+
+*2017-12-04 
+*notes 
+*exam
+chapter 4
+- least squares is considered asymptotically normal
+chapter 5 - restrictions
+- questions with asking to write the R matrix 
+show that you understand what it's trying to show
+includes residual maker 
+formula for R^2
+4 different ways to write the test statistic for F-test
+
+
+understand: 
+instrumental variables
+overidentification
+
+practice questions
+- use to review the slides/sections in textbook. 
+
+
