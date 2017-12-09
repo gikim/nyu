@@ -1,3 +1,32 @@
+*econ-1011-ps4-gk1512
+*ps4
+
+ssc install ivhettest
+ssc install estout
+
+log using ps4 
+
+cd D:\GIKIM\ECON-GA-1011-STATS\PSET
+use ps4-card.dta, clear
+
+describe 
+
+reg lwage educ exper expersq black smsa south 
+*other control variables
+smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669
+
+reg educ nearc4 nearc2, r
+
+*ivreg
+ivreg lwage (educ= nearc4 nearc2) exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669, first
+estat overid
+
+ivhettest
+estat ivhettest 
+
+ivhettest, nr2
+
+
 *2017-12-04 
 *lab session 
 
