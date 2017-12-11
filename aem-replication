@@ -272,43 +272,47 @@ replace married = 0 if us80a_marrno!=1
 
 replace married = 1 if married == .
 tab married
-save momchilddad.dta, replace
 
-*dataset to use for analyses
-********************************************************************************************************
-********************************************************************************************************
-********************************************************************************************************
-********************************************************************************************************
-
-use momchilddad.dta, clear
-* replicate table 2
 *more than two children 
 gen two = 1 if us80a_pernum3 != .
 replace two = 0 if two == .
-gen boy1 = 1 if us80a_sex1 == 1
+*gen boy1 = 1 if us80a_sex1 == 1
+gen boy1 = 1 if sex1 == 1
 replace boy1 = 0 if boy1 == .
-gen boy2 = 1 if us80a_sex2 == 1
+
+*gen boy2 = 1 if us80a_sex2 == 1
+gen boy2 = 1 if sex2 == 1
 replace boy2 = 0 if boy2 == .
-save merge1, replace
 
-* age of mother at birth of first child 
-gen agefirstchild = age - childage1
 
+save momchilddad.dta, replace
+*dataset to use for analyses
+********************************************************************************************************
+********************************************************************************************************
+use momchilddad.dta, clear
+* replicate table 2
+
+save momchilddad.dta, replace
+
+
+use momchilddad.dta, clear
+* replicate
+table 2
+table 6
+table 7 
 * replicate table 2, column 2
-
 sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin us80a_age 
 sum us80a_wkswork1 us80a_uhrswork 
 sum us80a_qwkswork us80a_incwage
 
 
+********************************************************************************************************
+********************************************************************************************************
+*notes
+*save merge1, replace
 *stateus us80a_pernum us80a_serial us80a_statefip us80a_ftotinc 
-
 *collapse (us80a_pernum us80a_nchild us80a_age us80a_marst us80a_agemarr)
-
-* replicate
-table 2
-table 6
-table 7 
-
+*age of mother at birth of first child 
+*gen agefirstchild = age - childage1
 
 
