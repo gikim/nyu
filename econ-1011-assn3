@@ -1,0 +1,25 @@
+use "G:\FAIR-HEALTH\fh-2016-2017\Allowed-2016-20171016\Allowed_20171031_v5.dta", clear
+reg demean hhinpi_1 hhiins_1 pop10 hu10 aland awater NF_1320201
+reg demean hhinpi_1 hhiins_1 pop10 hu10 aland awater NF_1320201, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 , r
+outreg2 using hhi.xls, append
+
+reg demean hhiins_1, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 hhiins_1, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 hhiins_1 pop10, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 hhiins_1 pop10 hu10, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 hhiins_1 pop10 hu10 aland, r
+outreg2 using hhi.xls
+
+reg demean hhinpi_1 hhiins_1 hu10 aland, r
+outreg2 using hhi.xls
