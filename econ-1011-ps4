@@ -5,8 +5,8 @@
 log using ps4, replace 
 
 *working directory 
-*cd D:\GIKIM\ECON-GA-1011-STATS\PSET
-C:\Users\gk1512\Documents\GK1512\ECON-1011-stat
+cd D:\GIKIM\ECON-GA-1011-STATS\PSET
+*C:\Users\gk1512\Documents\GK1512\ECON-1011-stat
 
 *dataset
 use card.dta, clear
@@ -62,6 +62,8 @@ save ps4-card.dta, replace
 
 *Q3a-Q6 are answered in the attached document. 
 log close
+*************************
+
 *************************
 
 *Q3a. The null hypothesis of the Wu-Hausman test is that the variable under consideration, education, is exogenous. 
