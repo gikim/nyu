@@ -107,7 +107,7 @@ If homoskedasticity is rejected one can use heteroskedasticity-consistent standa
 
 *Q6. 
 *All of the classical Linear Regression Model Assumptions hold except for the assumption of homoscedasticity. 
-*We would want to use robust (White) standard errors of the estimated coefficients instead of the usual standard errors to conduct hypothesis tests because instead of the usual  because in case of heteroscedasticity
+*We would want to use robust (White) standard errors of the estimated coefficients instead of the usual standard errors to conduct hypothesis tests because the assumption of homoscedasticity doesn't hold and the White estanndard errors account for heteroscedasticity. 
 *The difference in the conventional estimated variance of the OLS estimators and the White's estimated variance of the OLS estimators is
 
 
