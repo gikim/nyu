@@ -90,8 +90,8 @@ estat hettest
 *The lagrange multiplier is one half of the explained sum of squares of the regresion of g on Z
 *Under the null hypothesis, the LM has a chi-square distribution with the degrees of freedom equal to the rank of Z. 
 
-*Q5a. The null hypothesis of White test for heteroscedasticity is: 
-In statistics, the White test is a statistical test that establishes whether the variance of the errors in a regression model is constant: that is for homoskedasticity.
+*Q5a. The null hypothesis of White test for heteroscedasticity is that the variance of the errors in a regression model is constant.
+*If the null hypothesis holds, then we assume homoskedasticity of the standard errors.
 
 *Q5b. The auxiliary regression used to manually 
 To test for constant variance one undertakes an auxiliary regression analysis: this regresses the squared residuals from the original regression model onto a set of regressors that contain the original regressors along with their squares and cross-products. One then inspects the R2. The Lagrange multiplier (LM) test statistic is the product of the R2 value and sample size:
