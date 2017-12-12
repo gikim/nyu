@@ -1,3 +1,95 @@
+*ECON-1011-ps4-gk1512
+*PS4
+*log
+log using ps4, replace 
+*working directory 
+cd D:\GIKIM\ECON-GA-1011-STATS\PSET
+*dataset
+use card.dta, clear
+*description
+describe 
+*Q1. Regression form of the model: 
+reg lwage educ exper expersq black smsa south 
+*Regression with other control variables
+reg lwage educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669
+
+*Q1a.
+*"First Stage" Equation 
+reg educ nearc4 nearc2
+*first stage with control variables 
+reg educ nearc4 nearc2 exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669
+
+*Q1b.
+*In order for near4 and near2 to be valid instruments, we assume that the instrumental variables are relevant and exogenous. 
+*Thus, near4 and near2 should have statistically significant coefficients in the first stage least squares regression model. 
+*While near4 is statistically significant, near2 is not. The results remain the same even when including control variables. 
+
+*Q2
+*Estimate the structural model, with near4 and near2 as instruments for educ. 
+ivregress 2sls lwage exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 (educ = nearc4 nearc2)
+estat firststage
+
+*Q2a. 
+ivregress 2sls lwage exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 (educ = nearc4 nearc2)
+estat overid
+
+* We cannot reject the null hypothesis as the p-value is larger than 0.05. 
+* A statistically significant test statistic could represent either an invalid instrument or an incorrectly specified structural equation.
+* Because the test-statistic is not statistically significant, we cannot reject the null hypothesis that near4 and near2 are valid instruments. 
+
+*Q2b
+*Hausman test for endogeneity of education in the structural equation 
+ivregress 2sls lwage (educ=nearc4 nearc2) exper expersq black smsa south 
+estimates store reg_iv
+
+regress lwage educ exper expersq black smsa south 
+estimates store reg_ols
+hausman reg_iv reg_ols
+
+*For this version of the Hausman test, since the chi-square statistic is not larger than the critical value, 
+*we fail to reject the null hypothesis that educ is an exogenous variable. 
+
+*Q3
+regress educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 nearc4 nearc2 
+predict educ_pred
+gen educ_residual = educ-educ_pred
+reg lwage educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 educ_residual
+
+*Q3a. The null hypothesis of the Wu-Hausman test is that the variable under consideration, education, is exogenous. 
+*The coefficient of interest has a t-test of -1.71, and a p-value of 0.087.
+
+*Q3b.The ocnclusion of the test is that the null hypothesis cannot be rejected at the 5% level, but can be rejected at the 10% level. 
+*Thus, the level of significance will determine whether education is deemed an endogenous variable. 
+*At the 5% level, education is an endogenous variable. 
+*At the 10% level, we can reject the null hypothesis to conclude that education is exogenous. 
+
+save ps4-card.dta, replace
+
+*Q4a.
+*The null hypothesis of the Breusch-Pagan test for heteroscedasticity tests whether the variance of the errors from a regression is dependent on the values of the independent variables. 
+*In that case, heteroskedasticity is present.
+*The lagrange multiplier is one half of the explained sum of squares of the regresion of g on Z
+*under the null hypothesis, the LM has a chi-square distribution with the degrees of freedom equal to the rank of Z. 
+
+*Q4b.
+*Describe the auxiliary regression used to manually obtain a test statistic for the Breusch-Pagan test for heteroscedasticity.
+*Q4c. Describe the auxiliary regression used in the Stata post-estimation command hettest to obtain a test statistic for the Breusch- Pagan test for heteroscedasticity
+*Q4d. WhatissamplingdistributionoftheteststatisticfortheBreusch-Pagantestforheteroscedasticityif the null hypothesis is true?
+
+*Q5a. The null hypothesis of White test for heteroscedasticity is: 
+*Q5b. The auxiliary regression used to manually 
+*Q5c. The sampling distribution  of the test statistic for the White test for heteroscedasticity if the null hypothesis is true? Explain where the degrees of freedom come from.
+
+
+
+
+log close
+
+
+
+
+*************************8
+*notes
 *econ-1011-ps4-gk1512
 *ps4
 
