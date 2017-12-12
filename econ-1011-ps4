@@ -105,6 +105,11 @@ The logic of the test is as follows. First, the squared residuals from the origi
 An alternative to the White test is the Breusch–Pagan test, where the Breusch-Pagan test is designed to detect only linear forms of heteroskedasticity. Under certain conditions and a modification of one of the tests, they can be found to be algebraically equivalent.[4]
 If homoskedasticity is rejected one can use heteroskedasticity-consistent standard errors.
 
+*Q6. 
+*All of the classical Linear Regression Model Assumptions hold except for the assumption of homoscedasticity. 
+*We would want to use robust (White) standard errors of the estimated coefficients instead of the usual standard errors to conduct hypothesis tests because instead of the usual  because in case of heteroscedasticity
+*The difference in the conventional estimated variance of the OLS estimators and the White's estimated variance of the OLS estimators is
+
 
 log close
 
