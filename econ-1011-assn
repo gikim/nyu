@@ -1,2 +1,24 @@
 heteroscedasticity
 multucollinearilty 
+
+
+*exam
+sample q
+
+
+review LS estimator properties
+
+Properties of the LS estimator Oct23
+
+Properties of the LS estimator - unbiased
+0 conditional mean assumption 
+
+idea that while we did it for the previous slide, for the condition on X
+if we did hte smae thing for all possible values of X, get unconditional
+expected value of the least squares estimator. 
+
+the least square coefficent ector b
+
+least squres 
+b~
+
