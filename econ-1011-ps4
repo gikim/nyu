@@ -1,68 +1,56 @@
 *ECON-1011-ps4-gk1512
 *PS4
-
 *log
 log using ps4, replace 
-
 *working directory 
 cd D:\GIKIM\ECON-GA-1011-STATS\PSET
 *C:\Users\gk1512\Documents\GK1512\ECON-1011-stat
-
 *dataset
 use card.dta, clear
 *description
-describe 
+*describe 
 *Q1. Regression form of the model: 
 reg lwage educ exper expersq black smsa south 
 *Regression with other control variables
 reg lwage educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669
-
 *Q1a.
 *"First Stage" Equation 
 reg educ nearc4 nearc2
 *first stage with control variables 
 reg educ nearc4 nearc2 exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669
-
 *Q1b.
 *In order for near4 and near2 to be valid instruments, we assume that the instrumental variables are relevant and exogenous. 
 *Thus, near4 and near2 should have statistically significant coefficients in the first stage least squares regression model. 
 *While near4 is statistically significant, near2 is not. The results remain the same even when including control variables. 
-
 *Q2
 *Estimate the structural model, with near4 and near2 as instruments for educ. 
 ivregress 2sls lwage exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 (educ = nearc4 nearc2)
 estat firststage
-
 *Q2a. 
 ivregress 2sls lwage exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 (educ = nearc4 nearc2)
 estat overid
-
 * We cannot reject the null hypothesis as the p-value is larger than 0.05. 
 * A statistically significant test statistic could represent either an invalid instrument or an incorrectly specified structural equation.
 * Because the test-statistic is not statistically significant, we cannot reject the null hypothesis that near4 and near2 are valid instruments. 
-
 *Q2b
 *Hausman test for endogeneity of education in the structural equation 
 ivregress 2sls lwage (educ=nearc4 nearc2) exper expersq black smsa south 
 estimates store reg_iv
-
 regress lwage educ exper expersq black smsa south 
 estimates store reg_ols
 hausman reg_iv reg_ols
-
 *For this version of the Hausman test, since the chi-square statistic is not larger than the critical value, 
 *Thus, we fail to reject the null hypothesis that educ is an exogenous variable. 
-
 *Q3
 regress educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 nearc4 nearc2 
 predict educ_pred
 gen educ_residual = educ-educ_pred
 reg lwage educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 educ_residual
 save ps4-card.dta, replace
-
 *Q3a-Q6 are answered in the attached document. 
 log close
 translate ps4.smcl ps4-log.pdf, replace
+*************************
 *************************
 *************************
 *Q3a. The null hypothesis of the Wu-Hausman test is that the variable under consideration, education, is exogenous. 
