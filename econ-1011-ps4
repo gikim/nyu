@@ -1,9 +1,13 @@
 *ECON-1011-ps4-gk1512
 *PS4
+
 *log
 log using ps4, replace 
+
 *working directory 
-cd D:\GIKIM\ECON-GA-1011-STATS\PSET
+*cd D:\GIKIM\ECON-GA-1011-STATS\PSET
+C:\Users\gk1512\Documents\GK1512\ECON-1011-stat
+
 *dataset
 use card.dta, clear
 *description
@@ -47,7 +51,7 @@ estimates store reg_ols
 hausman reg_iv reg_ols
 
 *For this version of the Hausman test, since the chi-square statistic is not larger than the critical value, 
-*we fail to reject the null hypothesis that educ is an exogenous variable. 
+*Thus, we fail to reject the null hypothesis that educ is an exogenous variable. 
 
 *Q3
 regress educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 nearc4 nearc2 
@@ -55,6 +59,10 @@ predict educ_pred
 gen educ_residual = educ-educ_pred
 reg lwage educ exper expersq black smsa south smsa66 reg662 reg663 reg664 reg665 reg666 reg667 reg668 reg669 educ_residual
 save ps4-card.dta, replace
+
+*Q3a-Q6 are answered in the attached document. 
+log close
+*************************
 
 *Q3a. The null hypothesis of the Wu-Hausman test is that the variable under consideration, education, is exogenous. 
 *The coefficient of interest has a t-test of -1.71, and a p-value of 0.087.
@@ -66,10 +74,9 @@ save ps4-card.dta, replace
 
 *Q4a. The Breusch-Pagan test for heteroscedasticity tests whether the variance of the errors from a regression is dependent on the values of the independent variables. 
 *Under the null hypothesis, the variance is the same for all observations. If the variance of the errors is NOT dependent upon the independent variables, we can assume homoscedasticity. 
-* If we reject the null hypothesis is rejected, we assume that the errors are dependent on the values of the independent variables, and heteroskedasticity is present.
+*If we reject the null hypothesis is rejected, we assume that the errors are dependent on the values of the independent variables, and heteroskedasticity is present.
 
 *Q4b. The auxiliary regression used to  manually obtain a test statistic for the Breusch-Pagan test for heteroscedasticity, is a regression of a vector of observations g (where g is a function of the squared residuals from the least squares regression) on the matrix Z, the set of variables that may be influencing heteroscedasticity. 
-
 *The resulting test statistic is a Lagrange Multiplier (LM), calculated as one half of the explained sum of squares of the regresion of g on Z.
 *Under the null hypothesis, the LM has a chi-square distribution with the degrees of freedom equal to the rank of Z. 
 
@@ -88,12 +95,8 @@ save ps4-card.dta, replace
 *Q6. 
 *All of the classical Linear Regression Model Assumptions hold except for the assumption of homoscedasticity. 
 *We would want to use robust (White) standard errors of the estimated coefficients instead of the usual standard errors to conduct hypothesis tests because the assumption of homoscedasticity doesn't hold and the White estanndard errors account for heteroscedasticity. 
-*The difference in the conventional estimated variance of the OLS estimators and the White's estimated variance of the OLS estimators is
-that the White heteroscedasticity consistent estimator  can be used to estimate the asymptotic covariance matrix of b. 
-Without knowing the nature of neteroscedasticity, teh White estimator allows us to estimate the standard errors. 
-The convention estimated variacne of the OLS estimators, on teh other hand, assumes homoscedasticity, so it assumes that all of the observations are uncorrelated and all are drawn from a distribution wiht the same variance. 
-
-log close
+*The difference in the conventional estimated variance of the OLS estimators and the White's estimated variance of the OLS estimators is that the White heteroscedasticity consistent estimator  can be used to estimate the asymptotic covariance matrix of b. 
+*Without knowing the nature of neteroscedasticity, the White estimator allows us to estimate the standard errors. The convention estimated variacne of the OLS estimators, on teh other hand, assumes homoscedasticity, so it assumes that all of the observations are uncorrelated and all are drawn from a distribution wiht the same variance. 
 
 
 *************************
