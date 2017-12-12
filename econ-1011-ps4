@@ -62,10 +62,9 @@ save ps4-card.dta, replace
 
 *Q3a-Q6 are answered in the attached document. 
 log close
+translate ps4.smcl ps4-log.pdf, replace
 *************************
-
 *************************
-
 *Q3a. The null hypothesis of the Wu-Hausman test is that the variable under consideration, education, is exogenous. 
 *The coefficient of interest has a t-test of -1.71, and a p-value of 0.087.
 
