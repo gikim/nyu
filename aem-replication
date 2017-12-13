@@ -292,10 +292,6 @@ save momchilddad.dta, replace
 use momchilddad.dta, clear
 * replicate table 2
 
-save momchilddad.dta, replace
-
-
-use momchilddad.dta, clear
 * replicate
 table 2
 table 6
