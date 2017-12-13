@@ -1,0 +1,10 @@
+*aem 
+*ps5
+*Grace Kim
+*gk1512
+
+*cd
+cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+use DinD_ex.dta, clear 
+
+ttest 
