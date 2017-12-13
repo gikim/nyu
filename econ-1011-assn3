@@ -50,6 +50,7 @@ egen geo = group(servicing_provider_geozip)
 *xtset 
 xtset proc geo 
 xtreg mean hhiins_1 hhinpi_1 pop10 hu10 aland awater 
+xtreg mean hhiins_1 hhinpi_1 hu10 aland awater 
 
 *regular OLS 
 capture drop r
@@ -62,15 +63,21 @@ list proc geo r in -10/1
 
 *density plot 
 kdensity r, normal
+graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\kernel.gph", replace
+graph export "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\kernel.png", as(png) replace
 pnorm r
+graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\pnorm.gph", replace
 qnorm r
+graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\qnorm.gph", replace
+
 iqr r
 swilk r
 rvfplot, yline(0)
 
-*test for heteroscedasticity 
-estat imtest
-estat hettest 
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater if r<4
+predict r2, rstudent
+qnorm r2
+
 
 *check for multicollinearity 
 reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater
@@ -78,15 +85,66 @@ vif
 
 reg demean hhiins_1 hhinpi_1 hu10 aland awater
 vif
+*no multicollinearity in this model 
+
+*test for heteroscedasticity 
+
+reg demean hhiins_1 hhinpi_1 hu10 aland awater 
+estat imtest
+estat hettest 
+
+reg demean hhiins_1 hhinpi_1 hu10 aland awater, r
+*no F-test
+
+*robust standard errors 
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater, r
+reg demean hhiins_1 hhinpi_1 hu10 aland awater, r cluster(geo)
+
+*non linear relationship
+binscatter demean hhinpi_1
+
+twoway qfit demean hhinpi
+twoway lfit demean hhinpi
+
+*npi
+gen hhinpi_sq = hhinpi^2
+gen hhinpi_1_sq = hhinpi_1^2
+gen lnhhinpi_1 = ln(hhinpi_1)
+gen lnhhinpi = ln(hhinpi)
+
+*ins
+gen hhiins_1_sq = hhiins_1^2
+gen lnhhiins_1 = ln(hhiins_1)
+gen lnhhiins = ln(hhiins)
+
+
+binscatter demean lnhhinpi
+binscatter demean lnhhiins
+
+reg demean hhiins hhinpi hhinpi_sq hu10 aland awater
+
+reg demean lnhhiins lnhhinpi hu10 aland awater
+reg demean lnhhiins lnhhinpi hu10 aland awater, r
+reg demean lnhhiins lnhhinpi hu10 aland awater, r cluster(geo)
+
+
+reg demean hhiins_1 hhinpi_1 hhinpi_1_sq hu10 aland awater, r cluster(geo)
+reg demean hhiins_1 lnhhinpi hu10 aland awater, r cluster(geo)
+reg demean lnhhiins_1 lnhhinpi hu10 aland awater, r cluster(geo)
+
 
 *collin 
 search collin
 ssc install collin 
 collin demean hhiins_1 hhinpi_1 hu10 aland awater
 
-*robust standard errors 
-reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater, r
+*omitted variables 
+reg demean hhiins_1 hhinpi_1 hu10 aland awater
+linktest
+ovtest 
 
+binscatter demean hhinpi
+twoway (scatter demean hhinpi) (lfit demean hhinpi)
 
 *hilo
 search hilo
@@ -96,6 +154,16 @@ hilo r geo proc
 *avplot
 avplot 
 
+
+
+
+
+ssc install ftest
+help ftest
+
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater, r
+estimate store mod_1
+ftest mod_1
 
 
 *other regressions 
