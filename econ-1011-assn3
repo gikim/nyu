@@ -1,4 +1,14 @@
 use "G:\FAIR-HEALTH\fh-2016-2017\Allowed-2016-20171016\Allowed_20171031_v5.dta", clear
+
+*reg 
+reg demean hhinpi_1 hhiins_1 hu10 aland awater, r
+reg demean hhinpi_1 hhiins_1 hu10 aland awater
+
+
+xtset proc geo 
+xtreg mean hhiins_1 hhinpi_1 hu10 aland awater 
+
+
 reg demean hhinpi_1 hhiins_1 pop10 hu10 aland awater NF_1320201
 reg demean hhinpi_1 hhiins_1 pop10 hu10 aland awater NF_1320201, r
 outreg2 using hhi.xls
@@ -54,7 +64,7 @@ xtreg mean hhiins_1 hhinpi_1 hu10 aland awater
 
 *regular OLS 
 capture drop r
-reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater
+reg demean hhiins_1 hhinpi_1 hu10 aland awater
 predict r, rstudent
 stem r
 sort r
@@ -67,8 +77,10 @@ graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\kernel.gph", r
 graph export "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\kernel.png", as(png) replace
 pnorm r
 graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\pnorm.gph", replace
+graph export "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\pnorm.png", as(png) replace
 qnorm r
 graph save Graph "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\qnorm.gph", replace
+graph export "C:\Users\gk1512\Documents\GK1512\ECON-1011-stat\qnorm.png", as(png) replace
 
 iqr r
 swilk r
