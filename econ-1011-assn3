@@ -23,3 +23,84 @@ outreg2 using hhi.xls
 
 reg demean hhinpi_1 hhiins_1 hu10 aland, r
 outreg2 using hhi.xls
+
+***
+*stats, ucla 
+*describe
+describe mean hhiins hhinpi pop10 hu10 aland awater NF_1320201
+summarize mean hhiins hhinpi pop10 hu10 aland awater 
+graph matrix mean hhiins hhinpi 
+graph matrix demean hhiins hhinpi 
+
+pop10 hu10 aland awater 
+
+*
+scatter demean hhinpi
+scatter demean hhiins
+
+
+scatter mean hhinpi, mlabel(proc)
+
+
+*fixed effects
+*generate id for each procedure/geo 
+egen proc = group(proc_cd), label
+egen geo = group(servicing_provider_geozip)
+
+*xtset 
+xtset proc geo 
+xtreg mean hhiins_1 hhinpi_1 pop10 hu10 aland awater 
+
+*regular OLS 
+capture drop r
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater
+predict r, rstudent
+stem r
+sort r
+list proc geo r in 1/10 
+list proc geo r in -10/1
+
+*density plot 
+kdensity r, normal
+pnorm r
+qnorm r
+iqr r
+swilk r
+rvfplot, yline(0)
+
+*test for heteroscedasticity 
+estat imtest
+estat hettest 
+
+*check for multicollinearity 
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater
+vif
+
+reg demean hhiins_1 hhinpi_1 hu10 aland awater
+vif
+
+*collin 
+search collin
+ssc install collin 
+collin demean hhiins_1 hhinpi_1 hu10 aland awater
+
+*robust standard errors 
+reg demean hhiins_1 hhinpi_1 pop10 hu10 aland awater, r
+
+
+*hilo
+search hilo
+ssc install hilo
+hilo r geo proc 
+
+*avplot
+avplot 
+
+
+
+*other regressions 
+xtreg median hhiins_1 hhinpi_1 pop10 hu10 aland awater 
+xtreg mean hhiins_1 hhinpi_1 pop10 hu10 aland awater NF_1320201
+xtreg mean hhiins_1 hhinpi_1 hu10 aland
+xtreg mean hhiins hhinpi pop10 hu10 aland awater NF_1320201
+
