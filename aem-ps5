@@ -60,4 +60,5 @@ xi: reg loanbal TIKA nage tinpr i.interest_rate TIKA##i.interest_rate
 gen TIKA_interest_rate = TIKA*interest_rate
 reg loanbal TIKA nage tinpr i.interest_rate TIKA_interest_rate
 
+save ps5-2.dta, replace
 log close
