@@ -5,6 +5,59 @@
 
 *cd
 cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+
+log using ps5
+
+*cd
+cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+
 use DinD_ex.dta, clear 
 
-ttest 
+
+*1. mean differences to compute difference in means estimate of the change in minimum wage. 
+ttest fte, by(after)
+sum dfte
+
+*2. est diff in diff using regression model 
+reg dfte nj after njafter
+
+*robust option 
+reg dfte nj, r
+
+*3. estimate following model in levels, i.e. with LHS in levels. est. 2 versions of the model with different standard errors. 
+reg fte nj njafter after, r
+
+*4. cluster on sheet
+reg fte nj njafter after, cluster(sheet)
+
+*5. fixed effects
+xtset sheet
+xtreg fte nj njafter after, fe(sheet)
+xtreg fte nj, fe(sheet)
+
+*6.
+
+*7. shows persistant increase in employment in the 7 counties in pA, compared to the 14 counties in PA and NJ. 
+
+*8. 
+
+use safesave_slim_data.dta, clear
+
+twoway (scatter loanbal trend if TIKA == 1, sort) (scatter loanbal trend if TIKA == 0, sort)
+twoway (scatter loanbal trend if TIKA == 1, sort) (scatter loanbal trend if TIKA == 0, sort) (lfit loanbal trend if TIKA == 1, yaxis(2)) (lfit loanbal trend if TIKA == 0, yaxis(2))
+save q8.gph, replace
+
+*no, they do not look parallel 
+
+tab monthyear 
+tab trend
+gen interest_rate = 1 if trend >=13
+replace interest_rate = 0 if interest_rate == .
+tab trend if interest_rate == 1
+
+xi: reg loanbal TIKA nage tinpr i.interest_rate TIKA##i.interest_rate
+
+gen TIKA_interest_rate = TIKA*interest_rate
+reg loanbal TIKA nage tinpr i.interest_rate TIKA_interest_rate
+
+log close
