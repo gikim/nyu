@@ -1,58 +1,12 @@
-*replication
-*working directory 
+*AEM - Replication
+*Grace Kim
+*gk1512
+*Working directory 
 cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
-*load data
+*Load dataset
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
 ********************************************************************************************************
 ********************************************************************************************************
-*explore dataset
-*summary statistics 
-tab sex
-
-tab us80a_agemarr
-sum us80a_agemarr if us80a_agemarr == 1
-
-tab us80a_marst
-sum us80a_marst if us80a_marst == 1
-
-*mother location
-tab us80a_momloc
-
-*linking parent
-tab parrule
-sum parrule if parrule == 3
-
-
-tab us80a_marrno
-sum us80a_marrno if us80a_marrno == 1
-tab us80a_chborn
-sum us80a_chborn if us80a_chborn == 0
-sum us80a_chborn if us80a_chborn == 3
-sum us80a_chborn if us80a_chborn >= 3
-
-tab momloc 
-tab sex
-tab us80a_sploc
-tab us80a_nchild
-sum us80a_nchild if us80a_nchild == 0
-tab us80a_chborn
-tab us80a_age
-tab us80a_momrule
-sum us80a_momrule if us80a_momrule == 0
-sum us80a_momrule if us80a_momrule == 1
-browse if us80a_serial == 1
-tab us80a_pernum
-tab us80a_momloc
-
-tab us80a_chborn
-*NIU 
-tab us80a_widow 
-sum us80a_widow if us80a_widow == 0
-sum us80a_widow if us80a_widow == 1
-sum us80a_widow if us80a_widow == 2
-
-*income variables
-sum us80a_wkswork1 us80a_incwage us80a_ftotinc us80a_nchild us80a_wkswork1 us80a_incwage us80a_poverty us80a_incwelfr us80a_incbus us80a_widow us80a_qincbus us80a_qincwage us80a_quhrswor us80a_qwkswork us80a_qsex
 
 ********************************************************************************************************
 ********************************************************************************************************
@@ -414,7 +368,9 @@ quietly reg `x' child3 if married == 1
 outreg2 using table7.xls, append
 *5
 quietly ivreg `x' (child3 = same) if married == 1
+
 outreg2 using table7.xls, append
+
 *6
 quietly ivreg `x' (child3 = bothboy bothgirl) if married == 1
 outreg2 using table7.xls, append
@@ -422,6 +378,7 @@ outreg2 using table7.xls, append
 *columns 7-8
 foreach x in dad_workedpay dad_wkswork dad_uhrswork dad_incwage2{
 *1
+
 quietly reg `x' child3
 outreg2 using table7.xls, append
 *2
@@ -431,9 +388,59 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = bothboy bothgirl)
 outreg2 using table7.xls, append
 }
-********************************************************************************************************
-*notes
 
+********************************************************************************************************
+*explore dataset
+*explore dataset
+*summary statistics 
+tab sex
+
+tab us80a_agemarr
+sum us80a_agemarr if us80a_agemarr == 1
+
+tab us80a_marst
+sum us80a_marst if us80a_marst == 1
+
+*mother location
+tab us80a_momloc
+
+*linking parent
+tab parrule
+sum parrule if parrule == 3
+
+
+tab us80a_marrno
+sum us80a_marrno if us80a_marrno == 1
+tab us80a_chborn
+sum us80a_chborn if us80a_chborn == 0
+sum us80a_chborn if us80a_chborn == 3
+sum us80a_chborn if us80a_chborn >= 3
+
+tab momloc 
+tab sex
+tab us80a_sploc
+tab us80a_nchild
+sum us80a_nchild if us80a_nchild == 0
+tab us80a_chborn
+tab us80a_age
+tab us80a_momrule
+sum us80a_momrule if us80a_momrule == 0
+sum us80a_momrule if us80a_momrule == 1
+browse if us80a_serial == 1
+tab us80a_pernum
+tab us80a_momloc
+
+tab us80a_chborn
+*NIU 
+tab us80a_widow 
+sum us80a_widow if us80a_widow == 0
+sum us80a_widow if us80a_widow == 1
+sum us80a_widow if us80a_widow == 2
+
+*income variables
+sum us80a_wkswork1 us80a_incwage us80a_ftotinc us80a_nchild us80a_wkswork1 us80a_incwage us80a_poverty us80a_incwelfr us80a_incbus us80a_widow us80a_qincbus us80a_qincwage us80a_quhrswor us80a_qwkswork us80a_qsex
+
+*notes
 *1
 
 *outsum
