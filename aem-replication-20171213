@@ -69,6 +69,16 @@ keep if age <= 35
 keep if age >= 21
 *2 or more children 
 keep if us80a_chborn >= 2
+
+*restrictions 
+*footnote #5
+*sum us80a_qsex us80a_qage
+*tab us80a_qsex
+*tab us80a_qage
+
+keep if us80a_qsex == 0
+keep if us80a_qage == 0
+
 save mom, replace
 ********************************************************************************************************
 ********************************************************************************************************
@@ -113,6 +123,12 @@ keep if dad_sex == 1
 keep if dad_marst == 1
 *not a widow
 keep if dad_widow != 2
+
+*restrictions 
+*footnote #5
+keep if us80a_qsex == 0
+keep if us80a_qage == 0
+
 *keep variables, 
 keep us80a_serial dad*
 
@@ -128,6 +144,11 @@ keep if us80a_momrule == 1
 keep if us80a_chborn == 0
 keep if us80a_agemarr == 0
 keep if us80a_nchild == 0
+
+*restrictions 
+*footnote #5
+keep if us80a_qsex == 0
+keep if us80a_qage == 0
 
 sort us80a_serial
 *keep us80a_serial us80a_pernum us80a_sex us80a_age us80a_sex us80a_momloc momloc parrule us80a_momrule
@@ -177,7 +198,7 @@ tab bothgirl bothboy
 tab twin 
 
 save child-reshape1, replace
-save child-reshape2, replace
+*save child-reshape2, replace
 ********************************************************************************************************
 ********************************************************************************************************
 ********************************************************************************************************
@@ -292,26 +313,13 @@ replace child3 = 0 if sex3 == .
 *mom worked pay 
 gen mom_workedpay = 0 if us80a_wkswork1 == 0
 replace mom_workedpay = 1 if mom_workedpay == . 
-tab mom_workedpay
-
-tab mom_workedpay dad_workedpay 
+*tab mom_workedpay
+*tab mom_workedpay dad_workedpay 
 
 *capture drop lnfaminc
 gen lnfaminc = ln(us80a_ftotinc)
 
 
-*restrictions 
-*footnote #5
-
-sum us80a_qsex us80a_qage
-tab us80a_qsex
-tab us80a_qage
-
-keep if us80a_qsex == 0
-keep if us80a_qage == 0
-
-***ALSO restrict for children!!!
-*restrict top two childrenw ith age not allocated by census bureau 
 
 *income variables 
 *multiply by: 
@@ -345,7 +353,7 @@ gen lnmom_nonwifeinc = ln(mom_nonwifeinc)
 *black 
 *hispanic
 
-gen black = 1 if 
+gen black = 1 if race 
 gen hisp2 = 1 if hispan != "Not hispanic"
 gen otherrace = 1 if race != "White" | race != "Black"
 replace oth_race = 1 if black !=1 &hispanic !=1
@@ -373,16 +381,16 @@ outreg2 using table6.xls, append
 reg child3 boy1 boy2 same age agefirstchild hispan race
 outreg2 using table6.xls, append 
 *3
-reg child3 boy1 bothboy bothgirl
+reg child3 boy1 bothboy bothgirl age agefirstchild hispan race
 outreg2 using table6.xls, append 
 *4
 reg child3 same if married == 1
 outreg2 using table6.xls, append 
 *5
-reg child3 boy1 boy2 same if married == 1
+reg child3 boy1 boy2 same age agefirstchild hispan race if married == 1
 outreg2 using table6.xls, append 
 *6
-reg child3 boy1 bothboy bothgirl if married == 1
+reg child3 boy1 bothboy bothgirl age agefirstchild hispan race if married == 1
 outreg2 using table6.xls, append 
   
 *tabe 7
@@ -395,7 +403,7 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = same)
 outreg2 using table7.xls, append pvalue
 *3
-quietly ivreg `x'(child3 = bothboy bothgirl)
+quietly ivreg `x' (child3 = bothboy bothgirl)
 outreg2 using table7.xls, append
 }
 
@@ -408,7 +416,7 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = same) if married == 1
 outreg2 using table7.xls, append
 *6
-quietly ivreg `x'(child3 = bothboy bothgirl) if married == 1
+quietly ivreg `x' (child3 = bothboy bothgirl) if married == 1
 outreg2 using table7.xls, append
 }
 *columns 7-8
@@ -420,7 +428,7 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = same)
 outreg2 using table7.xls, append
 *3
-quietly ivreg `x'(child3 = bothboy bothgirl)
+quietly ivreg `x' (child3 = bothboy bothgirl)
 outreg2 using table7.xls, append
 }
 ********************************************************************************************************
