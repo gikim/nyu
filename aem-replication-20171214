@@ -25,6 +25,7 @@ keep if us80a_momrule == 0
 egen mom_id=concat(us80a_serial us80a_pernum), punct("-")
 
 sort us80a_serial
+sort mom_id
 save mom, replace
 ********************************************************************************************************
 *Dad File
@@ -73,6 +74,7 @@ keep us80a_serial dad*
 egen mom_id=concat(us80a_serial dad_sploc), punct("-")
 
 sort us80a_serial
+sort mom_id
 save dad.dta, replace
 ********************************************************************************************************
 ********************************************************************************************************
@@ -93,17 +95,14 @@ keep if us80a_qage == 0
 *Keep variables
 keep stateus us80a_serial momloc parrule age sex us80a_pernum us80a_momrule
 
+*Generate mom_id to link to mom dataset
+egen mom_id=concat(us80a_serial momloc), punct("-")
+
 *Generate var
 *Generate negative the by age in descending order 
 gen ageneg = age*(-1) 
 sort us80a_serial ageneg
-capture drop child
 bys us80a_serial: gen childnum = _n
-
-*Generate mom_id to link to mom dataset
-egen mom_id=concat(us80a_serial momloc), punct("-")
-
-sort mom_id
 save child, replace
 ********************************************************************************************************
 *Child file, reshape
@@ -113,6 +112,9 @@ reshape wide stateus momloc parrule age sex us80a_pernum us80a_momrule ageneg mo
 
 *Only households w/ 2+ children 
 drop if age2 == .
+
+*Drop if second child is less than a year old 
+keep if age2 > 0
 
 *Same gender
 gen same = 1 if sex1 == sex2
@@ -165,20 +167,16 @@ rename _merge mergemomchild
 save merge, replace
 ********************************************************************************************************
 *Merge: momchild, with dad dataset
-*Link married women to husbands 
-*Husband code:
+*Link married women to husbands data
 
 use merge, clear
-merge 1:m us80a_serial using dad.dta
-*drop the not matched results from the dad dataset (exclude men not linked to the mom household)
+*merge 1:m us80a_serial using dad.dta
+merge 1:m mom_id using dad.dta
+
+*Drop the not matched results from the dad dataset (exclude men not linked to the mom household)
 keep if _merge !=2
 
-*drop if second child is less than a year old 
-tab age2
-sum age2 if age2 == 0
-keep if age2 > 0
-
-*check that the men in the household have >=2 children in household 
+*Check that the men in the household have >=2 children in household 
 tab dad_nchild
 keep if dad_nchild != 0 
 keep if dad_nchild != 1
