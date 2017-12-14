@@ -7,192 +7,166 @@ cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
 ********************************************************************************************************
 ********************************************************************************************************
-
-********************************************************************************************************
-********************************************************************************************************
-*preserve
-*file with women, age 21-35, 2+ children  
-*keep commands
-*load data
-use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+*Mom File
+*File with women, age 21-35, 2+ children  
+*Keep commands
 keep if sex == 2
-*age < 60
-*keep if age <= 60
-*age < 35, > 21
+*Age < 35, > 21
 keep if age <= 35
 keep if age >= 21
 *2 or more children 
 keep if us80a_chborn >= 2
+*Restrictions (footnote #5)
+keep if us80a_qsex == 0
+keep if us80a_qage == 0
+*Keep moms with no mother link (i.e. no grandmothers, momrule == 0)
+keep if us80a_momrule == 0
+*Generate household with pernum = mom id 
+egen mom_id=concat(us80a_serial us80a_pernum), punct("-")
 
-*restrictions 
-*footnote #5
-*sum us80a_qsex us80a_qage
-*tab us80a_qsex
-*tab us80a_qage
+sort us80a_serial
+save mom, replace
+********************************************************************************************************
+*Dad File
+*File with married men
+use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
 
+*Restrict dataset to men, married, not a widow
+keep if dad_sex == 1
+*Married
+keep if dad_marst == 1
+*Not a widow
+keep if dad_widow != 2
+*Restrictions (footnote #5)
 keep if us80a_qsex == 0
 keep if us80a_qage == 0
 
-save mom, replace
-********************************************************************************************************
-********************************************************************************************************
-*file with married men
-use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
-
-*rename variables 
+*Rename variables 
 rename sex dad_sex
 rename age dad_age
+*Spouse Location
 rename us80a_sploc dad_sploc
 rename us80a_pernum dad_pernum
 rename us80a_marst dad_marst
 rename us80a_widow dad_widow
-*own children in household 
+*Own children in household 
 rename us80a_nchild dad_nchild
-*rule for linking mother, momrule 
+*Rule for linking mother, momrule 
 rename us80a_momrule dad_momrule
-*mothers location in household 
+*Mothers location in household 
 rename us80a_momloc dad_momloc
-
-*income variables 
-*worked for pay
-*tab us80a_wkswork1
-*sum us80a_wkswork1 if us80a_wkswork1 == 0
+*Income variables 
+*Worked for pay
 gen dad_workedpay = 0 if us80a_wkswork1 == 0
 replace dad_workedpay = 1 if dad_workedpay == . 
-*tab dad_workedpay
-
-*weeks worked last year
+*Weeks worked last year
 rename us80a_wkswork1 dad_wkswork
-
-*hours/week
+*Hours/week
 rename us80a_uhrswork dad_uhrswork
-
-*labor income
-*sum us80a_incwage
+*Labor income
 rename us80a_incwage dad_incwage
-
-*restrict dataset to men, married, not a widow
-keep if dad_sex == 1
-*married
-keep if dad_marst == 1
-*not a widow
-keep if dad_widow != 2
-
-*restrictions 
-*footnote #5
-keep if us80a_qsex == 0
-keep if us80a_qage == 0
 
 *keep variables, 
 keep us80a_serial dad*
+
+*Generate id to link to mom data.
+egen mom_id=concat(us80a_serial dad_sploc), punct("-")
 
 sort us80a_serial
 save dad.dta, replace
 ********************************************************************************************************
 ********************************************************************************************************
-* file with children
+*Child
+*File with children
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
-*identify children 
+*Keep if under 17 years old, clear mom, no children, not married
 keep if age <= 17
 keep if us80a_momrule == 1
 keep if us80a_chborn == 0
 keep if us80a_agemarr == 0
 keep if us80a_nchild == 0
 
-*restrictions 
-*footnote #5
+*Restrictions (footnote #5)
 keep if us80a_qsex == 0
 keep if us80a_qage == 0
 
-sort us80a_serial
-*keep us80a_serial us80a_pernum us80a_sex us80a_age us80a_sex us80a_momloc momloc parrule us80a_momrule
-*keep us80a_serial us80a_pernum us80a_momloc us80a_age us80a_sex
-*sort us80a_serial us80a_age us80a_pernum us80a_momloc 
-*sort stateus us80a_serial momloc parrule age sex us80a_pernum us80a_momrule
+*Keep variables
 keep stateus us80a_serial momloc parrule age sex us80a_pernum us80a_momrule
 
-*generate negative the by age in descending order 
+*Generate var
+*Generate negative the by age in descending order 
 gen ageneg = age*(-1) 
 sort us80a_serial ageneg
 capture drop child
 bys us80a_serial: gen childnum = _n
-browse us80a_serial age ageneg child
 
+*Generate mom_id to link to mom dataset
+egen mom_id=concat(us80a_serial momloc), punct("-")
+
+sort mom_id
 save child, replace
 ********************************************************************************************************
-*child file, reshape
+*Child file, reshape
 use child, clear
-*reshape wide us80a_sex us80a_age us80a_momloc, i(us80a_serial) j(us80a_pernum) 
-reshape wide stateus momloc parrule age sex us80a_pernum us80a_momrule ageneg, i(us80a_serial) j(childnum) 
+*Reshape 
+reshape wide stateus momloc parrule age sex us80a_pernum us80a_momrule ageneg mom_id, i(us80a_serial) j(childnum) 
 
-*only households w/ 2+ children 
-*drop if us80a_age2 == .
+*Only households w/ 2+ children 
 drop if age2 == .
 
-*same gender
-*gen same = 1 if us80a_sex1 == us80a_sex2
+*Same gender
 gen same = 1 if sex1 == sex2
 replace same = 0 if same == .
-*first two children, both girls 
-*gen bothgirl = 1 if us80a_sex1 == 2 & us80a_sex2 == 2
+*First two children, both girls 
 gen bothgirl = 1 if sex1 == 2 & sex2 == 2
 replace bothgirl = 0 if bothgirl == .
-*first two children, both boys
-*gen bothboy = 1 if us80a_sex1 == 1 & us80a_sex2 == 1
+*First two children, both boys
 gen bothboy = 1 if sex1 == 1 & sex2 == 1
 replace bothboy = 0 if bothboy == . 
-
-*gen twin = 1 if us80a_age1 == us80a_age2
+*Twins
 gen twin = 1 if age1 == age2
 replace twin = 0 if twin == .
 
-tab same bothgirl
-tab same bothboy
-tab bothgirl bothboy
-tab twin 
+*Check: first two children have the same mom 
+capture drop samemom2
+gen samemom2 = 1 if momloc1 == momloc2 
+replace samemom2 = 0 if samemom2 == .
+*Check first three children have the same mom, if there is a third child
+capture drop samemom3
+gen samemom3 = 1 if momloc1 == momloc2 & momloc2 == momloc3
+replace samemom3 = 0 if samemom3 == .
+replace samemom3 = . if momloc3 == .
 
+*Keep: first two children have the same mom 
+keep if samemom2 == 1
+
+*Keep: if there are 3+ children, first three children have the same mom 
+keep if samemom3 != 0
+
+sort us80a_serial
 save child-reshape1, replace
-*save child-reshape2, replace
 ********************************************************************************************************
-********************************************************************************************************
-********************************************************************************************************
-
-*merge mom with child dataset
+*Merge: mom with child dataset
 use mom, clear
 merge m:1 us80a_serial using child-reshape1.dta
 keep if _merge == 3
 
-*check first two children have the same mom 
-*gen samemom = 1 if us80a_momloc1 == us80a_momloc2
-gen samemom = 1 if momloc1 == momloc2 
-*check first three children have the same mom, if there is a third child
-capture drop samemom3
-gen samemom3 = 1 if momloc1 == momloc2 == momloc3 & momloc3 != .
-
-*make sure that the momloc for the children matches with the mom's person number in the household 
-*gen rightmom = 1 if us80a_pernum == us80a_momloc1 & us80a_pernum == us80a_momloc2
+*Check: right mom: mom's person number in the household, matches momloc for the first two children
+*First two children linked to the same mom in the mom dataset. 
+capture drop rightmom
 gen rightmom = 1 if us80a_pernum == momloc1 & us80a_pernum == momloc2
 
-*check that the first two children have the same mom AND linked to the same mom in the mom dataset. 
-gen mom2 = 1 if us80a_pernum == momloc1 & us80a_pernum == momloc2 & momloc1 == momloc2
+*Keep: households with right mom
+keep if rightmom == 1
 
-rename samemom mom0
-rename rightmom mom1
-
-*keep only moms with no mother link, momrule == 0 
-keep if us80a_momrule == 0
-*keep only households with right mom and same mom 
-keep if mom2 == 1
-*drop both
 sort us80a_serial
+sort mom_id
 rename _merge mergemomchild
 save merge, replace
-
 ********************************************************************************************************
-*merge mom with dad dataset
-
-*link married women to husbands 
-*husband code:
+*Merge: momchild, with dad dataset
+*Link married women to husbands 
+*Husband code:
 
 use merge, clear
 merge 1:m us80a_serial using dad.dta
@@ -368,7 +342,6 @@ quietly reg `x' child3 if married == 1
 outreg2 using table7.xls, append
 *5
 quietly ivreg `x' (child3 = same) if married == 1
-
 outreg2 using table7.xls, append
 
 *6
@@ -378,7 +351,6 @@ outreg2 using table7.xls, append
 *columns 7-8
 foreach x in dad_workedpay dad_wkswork dad_uhrswork dad_incwage2{
 *1
-
 quietly reg `x' child3
 outreg2 using table7.xls, append
 *2
@@ -390,7 +362,8 @@ outreg2 using table7.xls, append
 }
 
 ********************************************************************************************************
-*explore dataset
+********************************************************************************************************
+********************************************************************************************************
 *explore dataset
 *summary statistics 
 tab sex
@@ -439,6 +412,7 @@ sum us80a_widow if us80a_widow == 2
 
 *income variables
 sum us80a_wkswork1 us80a_incwage us80a_ftotinc us80a_nchild us80a_wkswork1 us80a_incwage us80a_poverty us80a_incwelfr us80a_incbus us80a_widow us80a_qincbus us80a_qincwage us80a_quhrswor us80a_qwkswork us80a_qsex
+
 
 *notes
 *1
