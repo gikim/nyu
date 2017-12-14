@@ -3,6 +3,8 @@
 *gk1512
 *Working directory 
 cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+*log file
+log using aem-rep-gk1512, replace
 *Load dataset
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
 ********************************************************************************************************
@@ -16,6 +18,7 @@ keep if age <= 35
 keep if age >= 21
 *2 or more children 
 keep if us80a_chborn >= 2
+keep if us80a_nchild >= 2
 *Restrictions (footnote #5)
 keep if us80a_qsex == 0
 keep if us80a_qage == 0
@@ -32,16 +35,6 @@ save mom, replace
 *File with married men
 use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
 
-*Restrict dataset to men, married, not a widow
-keep if dad_sex == 1
-*Married
-keep if dad_marst == 1
-*Not a widow
-keep if dad_widow != 2
-*Restrictions (footnote #5)
-keep if us80a_qsex == 0
-keep if us80a_qage == 0
-
 *Rename variables 
 rename sex dad_sex
 rename age dad_age
@@ -50,6 +43,8 @@ rename us80a_sploc dad_sploc
 rename us80a_pernum dad_pernum
 rename us80a_marst dad_marst
 rename us80a_widow dad_widow
+rename agemarr dad_agemarr
+rename us80a_marrno dad_marrno
 *Own children in household 
 rename us80a_nchild dad_nchild
 *Rule for linking mother, momrule 
@@ -67,7 +62,20 @@ rename us80a_uhrswork dad_uhrswork
 *Labor income
 rename us80a_incwage dad_incwage
 
-*keep variables, 
+
+*Restrict dataset to men, married, not a widow
+keep if dad_sex == 1
+*Married
+keep if dad_marst == 1
+*Married once 
+keep if dad_marrno == 1
+*Not a widow
+keep if dad_widow != 2
+*Restrictions (footnote #5)
+keep if us80a_qsex == 0
+keep if us80a_qage == 0
+
+*keep variables:
 keep us80a_serial dad*
 
 *Generate id to link to mom data.
@@ -116,18 +124,45 @@ drop if age2 == .
 *Drop if second child is less than a year old 
 keep if age2 > 0
 
+*Child indicators
+*More than two children 
+gen moretwo = 1 if us80a_pernum3 != .
+replace moretwo = 0 if two == .
+
+*Third child 
+capture drop child3
+gen child3 = 1 if sex3 != . 
+replace child3 = 0 if sex3 == .
+
+*First Child is a boy
+*gen boy1 = 1 if us80a_sex1 == 1
+gen boy1 = 1 if sex1 == 1
+replace boy1 = 0 if boy1 == .
+
+*Second Child is a boy
+*gen boy2 = 1 if us80a_sex2 == 1
+gen boy2 = 1 if sex2 == 1
+replace boy2 = 0 if boy2 == .
+
+*First two children, both boys
+gen twoboy = 1 if sex1 == 1 & sex2 == 1
+replace twoboy = 0 if twoboy == . 
+
+*First two children, both girls 
+gen twogirl = 1 if sex1 == 2 & sex2 == 2
+replace twogirl = 0 if twogirl == .
+
 *Same gender
 gen same = 1 if sex1 == sex2
 replace same = 0 if same == .
-*First two children, both girls 
-gen bothgirl = 1 if sex1 == 2 & sex2 == 2
-replace bothgirl = 0 if bothgirl == .
-*First two children, both boys
-gen bothboy = 1 if sex1 == 1 & sex2 == 1
-replace bothboy = 0 if bothboy == . 
+
 *Twins
 gen twin = 1 if age1 == age2
 replace twin = 0 if twin == .
+
+*Triplets
+gen triplet = 1 if age1 == age2 == age3
+replace triplet = 0 if triplet == .
 
 *Check: first two children have the same mom 
 capture drop samemom2
@@ -146,11 +181,13 @@ keep if samemom2 == 1
 keep if samemom3 != 0
 
 sort us80a_serial
+rename mom_id1 mom_id
 save child-reshape1, replace
 ********************************************************************************************************
 *Merge: mom with child dataset
 use mom, clear
-merge m:1 us80a_serial using child-reshape1.dta
+*merge m:1 us80a_serial using child-reshape1.dta
+merge m:1 mom_id using child-reshape1.dta
 keep if _merge == 3
 
 *Check: right mom: mom's person number in the household, matches momloc for the first two children
@@ -171,70 +208,51 @@ save merge, replace
 
 use merge, clear
 *merge 1:m us80a_serial using dad.dta
+*merge by linking linking dad's spouse location with mom's person number
 merge 1:m mom_id using dad.dta
 
 *Drop the not matched results from the dad dataset (exclude men not linked to the mom household)
 keep if _merge !=2
 
 *Check that the men in the household have >=2 children in household 
-tab dad_nchild
 keep if dad_nchild != 0 
 keep if dad_nchild != 1
-*check that mom have 2+ children 
-tab us80a_nchild
 
-*married
-*??married file: women with at least one child living with their husband who are less than age 60, children 17 or younger 
-*paper: married tab, women married at time of first birth, married at time of survey, and married once 
-
-*create indicator for married couples 
-*indicator = 1 for married mothers
+*Create indicator for married couples: 
+*Paper: women married at time of first birth, married at time of survey, and married once 
+*Check: exercise instructions: women with at least one child living with their husband who are less than age 60, children 17 or younger 
+*Indicator = 1 for married mothers (as defined in paper)
 capture drop married
 gen married = .
 
-*married at time of survey 
+*Married at time of survey 
 replace married = 0 if us80a_marst != 1
+
 *0 if spouse is not in the household, i.e. mom is not the dad's spouse, vice versa 
 *0 if mom's person number is NOT equal to dad's spouse location, i.e. mom is not dad's spose, or dad is not in household
-tab dad_sploc
-tab us80a_sploc
-tab dad_pernum
-tab us80a_pernum
-
 replace married = 0 if us80a_sploc != dad_pernum
-*same number when linking dad's spouse location with mom's person number
-*gen married = 0 if dad_sploc != us80a_pernum
+replace married = 0 if dad_sploc != us80a_pernum
 
-*married at time of first birth 
-*married = 0 if age minus the age of oldest child, age at first child, is less than the age married
+*Married at time of first birth 
+*Married = 0 if age minus the age of oldest child, age at first child, is less than the age married
 *age first child
 capture drop agefirstchild
 gen agefirstchild = age-age1
 replace married = 0 if agefirstchild < agemarr
 
-*married once 
-tab us80a_marrno
-sum us80a_marrno if us80a_marrno==1
+*Dad married at age of first child
+gen dad_agefirstchild = dad_age - age1
+replace married = 0 if dad_agefirstchild < dad_agemarr
+
+*Married once 
+*tab us80a_marrno
+*sum us80a_marrno if us80a_marrno==1
 replace married = 0 if us80a_marrno!=1
 
+*All other married
 replace married = 1 if married == .
 tab married
 
-*more than two children 
-gen two = 1 if us80a_pernum3 != .
-replace two = 0 if two == .
-*gen boy1 = 1 if us80a_sex1 == 1
-gen boy1 = 1 if sex1 == 1
-replace boy1 = 0 if boy1 == .
-
-*gen boy2 = 1 if us80a_sex2 == 1
-gen boy2 = 1 if sex2 == 1
-replace boy2 = 0 if boy2 == .
-
-*gen if they had a third child 
-capture drop child3
-gen child3 = 1 if sex3 != . 
-replace child3 = 0 if sex3 == .
 
 *mom worked pay 
 gen mom_workedpay = 0 if us80a_wkswork1 == 0
@@ -242,47 +260,34 @@ replace mom_workedpay = 1 if mom_workedpay == .
 *tab mom_workedpay
 *tab mom_workedpay dad_workedpay 
 
-*capture drop lnfaminc
+capture drop lnfaminc
 gen lnfaminc = ln(us80a_ftotinc)
 
-
-
-*income variables 
-*multiply by: 
-*2.099173552
+*Income variables: multiply by: 2.099173552
 
 gen mom_incwage = us80a_incwage*2.099173552
 gen mom_ftotinc = us80a_ftotinc*2.099173552
 gen dad_incwage2 = dad_incwage*2.099173552
 
-*merge 
-*link child's serial and momloc with mom's serial number and pernum 
-*link sploc to dad's pernum 
-
 *nonwife income 
 gen mom_nonwifeinc = us80a_ftotinc-mom_incwage
 gen lnmom_nonwifeinc = ln(mom_nonwifeinc)
 
-
-*make sure that in the mom's dataset, the serial#+pernum = in dad's dataset, serial# + sploc 
-*household with additional kids - husband with kids froma notehr marriage, keep in dataset 
-*just focus on mom 
-
-*additional impact of 3rd kid 
-*instrument affects fertility at the margin of the 3rd kid 
-*in a strict sense if the mother plans to have 8 kids from the beginning, instrument doesn't affect her 
-* effect from IV strategy not representative of that person 
-*problem with IV - don't know whose's the comparison 
-
-
 *race
-*black 
-*hispanic
+egen race2 = group(race)
 
-gen black = 1 if race 
-gen hisp2 = 1 if hispan != "Not hispanic"
-gen otherrace = 1 if race != "White" | race != "Black"
-replace oth_race = 1 if black !=1 &hispanic !=1
+*black 
+gen black = 1 if race2 == 2
+replace black = 0 if black == . 
+
+*hispanic
+egen hispan2 = group(hispan)
+gen hispanic = 1 if hispan2 != 1
+replace hispanic = 0 if hispanic == .
+
+*Other race
+gen otherrace = 1 if black != 1 & hispanic != 1
+replace otherrace = 0 if otherrace == .
 
 save momchilddad.dta, replace
 *dataset to use for analyses
@@ -291,12 +296,15 @@ save momchilddad.dta, replace
 use momchilddad.dta, clear
 
 *table 2
-*1
-sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2
-*2
-sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2 if married == 1
+*1&2
+estpost tabstat us80a_nchild moretwo boy1 boy2 twoboy twogirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc, by(married) statistics(mean sd) columns(statistics) listwise 
+
+esttab using table2.csv, main(mean) aux(sd) unstack replace label
+
 *3
-sum dad_age dad_workedpay dad_wkswork dad_uhrswork dad_incwage2
+estpost tabstat dad_age dad_agefirstchild dad_workedpay dad_wkswork dad_uhrswork dad_incwage2, statistics(mean sd) columns(statistics) listwise 
+
+esttab using table2.csv, main(mean) aux(sd) unstack label append
 
 *table 6 
 cd D:\GIKIM\AEM\replication
@@ -304,19 +312,19 @@ cd D:\GIKIM\AEM\replication
 reg child3 same
 outreg2 using table6.xls, append 
 *2
-reg child3 boy1 boy2 same age agefirstchild hispan race
+reg child3 boy1 boy2 same age agefirstchild black hispanic otherrace
 outreg2 using table6.xls, append 
 *3
-reg child3 boy1 bothboy bothgirl age agefirstchild hispan race
+reg child3 boy1 bothboy bothgirl age agefirstchild black hispanic otherrace
 outreg2 using table6.xls, append 
 *4
 reg child3 same if married == 1
 outreg2 using table6.xls, append 
 *5
-reg child3 boy1 boy2 same age agefirstchild hispan race if married == 1
+reg child3 boy1 boy2 same age agefirstchild black hispanic otherrace if married == 1
 outreg2 using table6.xls, append 
 *6
-reg child3 boy1 bothboy bothgirl age agefirstchild hispan race if married == 1
+reg child3 boy1 bothboy bothgirl age agefirstchild black hispanic otherrace if married == 1
 outreg2 using table6.xls, append 
   
 *tabe 7
@@ -329,7 +337,7 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = same)
 outreg2 using table7.xls, append pvalue
 *3
-quietly ivreg `x' (child3 = bothboy bothgirl)
+quietly ivreg `x' (child3 = twoboy twogirl)
 outreg2 using table7.xls, append
 }
 
@@ -343,7 +351,7 @@ quietly ivreg `x' (child3 = same) if married == 1
 outreg2 using table7.xls, append
 
 *6
-quietly ivreg `x' (child3 = bothboy bothgirl) if married == 1
+quietly ivreg `x' (child3 = twoboy twogirl) if married == 1
 outreg2 using table7.xls, append
 }
 *columns 7-8
@@ -355,13 +363,66 @@ outreg2 using table7.xls, append
 quietly ivreg `x' (child3 = same)
 outreg2 using table7.xls, append
 *3
-quietly ivreg `x' (child3 = bothboy bothgirl)
+quietly ivreg `x' (child3 = twoboy twogirl)
 outreg2 using table7.xls, append
 }
+
+log close
 
 ********************************************************************************************************
 ********************************************************************************************************
 ********************************************************************************************************
+*notes
+*2
+sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2 if married == 1
+
+*est commands
+
+estpost sum us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc 
+
+esttab using table2.csv, cells("count mean sd") replace
+
+estpost tabstat us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2, stats(mean sd) columns(statistics) listwise 
+
+esttab using table2.csv, cells("us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2") main(mean) aux(sd) unstack nomtitle nonumber label replace
+
+
+esttab using table2.csv, cells("us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2") nomtitle nonumber replace
+
+cells("us80a_nchild two boy1 boy2 bothboy bothgirl same twin age agefirstchild mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage mom_ftotinc dad_incwage2") main(mean) aux(sd) unstack nomtitle label replace
+
+
+
+*merge 
+*link child's serial and momloc with mom's serial number and pernum 
+*link sploc to dad's pernum 
+
+*make sure that in the mom's dataset, the serial#+pernum = in dad's dataset, serial# + sploc 
+*household with additional kids - husband with kids froma notehr marriage, keep in dataset 
+*just focus on mom 
+
+*additional impact of 3rd kid 
+*instrument affects fertility at the margin of the 3rd kid 
+*in a strict sense if the mother plans to have 8 kids from the beginning, instrument doesn't affect her 
+* effect from IV strategy not representative of that person 
+*problem with IV - don't know whose's the comparison 
+
+
+
+
+*tab dad_nchild
+*Check that mom have 2+ children 
+*tab us80a_nchild
+
+
+*tab dad_sploc
+(tab us80a_sploc
+*tab dad_pernum
+*tab us80a_pernum
+
+
+
+
 *explore dataset
 *summary statistics 
 tab sex
