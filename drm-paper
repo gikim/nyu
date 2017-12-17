@@ -46,3 +46,4 @@ tab network_ind pt
 ttest billed_charge, by(network_ind)
 ttest billed_charge, by(pt)
 
+save 2016-pt.dta, replace 
