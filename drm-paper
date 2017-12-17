@@ -1,0 +1,47 @@
+
+use "G:\FAIR-HEALTH\gaz_zcta_geozip.dta" 
+*price transparency literature
+
+gen pt = 1 if geozip == "128"
+replace pt = 1 if geozip == "129"
+replace pt = 0 if geozip == "121"
+replace pt = 0 if geozip == "120"
+ttest pop10, by(pt)
+ttest hu10, by(pt)
+ttest aland, by(pt)
+ttest awater, by(pt)
+
+
+*2016 dataset 
+use "G:\FAIR-HEALTH\fh-2016-2017\2016\2016_20171210.dta" 
+gen geozip = servicing_provider_geozip
+*price transparency indicator
+* 128, 129 adjacent to vermont 
+* 120, 121, 122: adjacent to the pt zipcodes 
+gen pt = 1 if geozip == 128
+replace pt = 1 if geozip == 129
+replace pt = 0 if geozip == 120
+replace pt = 0 if geozip == 121
+replace pt = 0 if geozip == 122
+replace pt = 0 if geozip == 123
+
+xtset proc_cd
+xtreg billed_charge pt, fe 
+
+drop if pt == .
+
+xtset proc_cd
+xtreg billed_charge pt network_ind, fe 
+
+tab proc_cd network_ind
+tab network_ind pt
+
+reg billed_charge pt network_ind, cluster(proc_cd)
+reg billed_charge pt, cluster(proc_cd)
+
+tab proc_cd network_ind
+tab network_ind pt
+
+ttest billed_charge, by(network_ind)
+ttest billed_charge, by(pt)
+
