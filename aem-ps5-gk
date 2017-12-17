@@ -5,14 +5,10 @@
 
 *cd
 cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+cd C:\Users\gk1512\Documents\GK1512\AEM
 
-log using ps5
-
-*cd
-cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
-
+log using ps5-log, replace
 use DinD_ex.dta, clear 
-
 
 *1. mean differences to compute difference in means estimate of the change in minimum wage. 
 ttest fte, by(after)
@@ -32,8 +28,8 @@ reg fte nj njafter after, cluster(sheet)
 
 *5. fixed effects
 xtset sheet
-xtreg fte nj njafter after, fe(sheet)
-xtreg fte nj, fe(sheet)
+xtreg fte nj njafter after, fe
+xtreg fte nj, fe
 
 *6.
 
