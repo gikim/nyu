@@ -38,6 +38,7 @@ tab network_ind pt
 
 reg billed_charge pt network_ind, cluster(proc_cd)
 reg billed_charge pt, cluster(proc_cd)
+reg billed_charge pt, cluster(npi)
 
 tab proc_cd network_ind
 tab network_ind pt
