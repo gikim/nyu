@@ -4,15 +4,21 @@
 *gk1512
 
 *cd
-cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+*cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
 cd C:\Users\gk1512\Documents\GK1512\AEM
 
 log using ps5-log, replace
 use DinD_ex.dta, clear 
 
 *1. mean differences to compute difference in means estimate of the change in minimum wage. 
+*differences in fte by nj or not nj 
+ttest dfte, by(nj)
+sum dfte
+*nj had an increase, while pennsylvania decreased. 
+
 ttest fte, by(after)
 sum dfte
+
 
 *2. est diff in diff using regression model 
 reg dfte nj after njafter
