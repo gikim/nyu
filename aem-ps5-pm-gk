@@ -1,0 +1,86 @@
+**PS5
+use "D:\GIKIM\AEM\PROBLEM-SETS\PS5\DinD_ex.dta"
+log using ps5-2, replace
+**pm2659 PS5
+**#1 compute the mean difference post/pre
+*tab dfte
+mean fte if nj==1 & after==0 //mean of pre nj fte's
+mean fte if nj==1 & after==1 //mean of post nj fte's
+
+gen njprefte= fte if nj==1 & after==0 
+gen njpostfte= fte if nj==1 & after==1
+
+ttest fte if nj==0, by(after)
+ttest fte if nj==1, by(after) //p-0.6971
+display 17.58363-17.30106 // = 0.28257
+
+mean fte if nj==0 & after==0 //mean of pre nj fte's
+mean fte if nj==0 & after==1 //mean of post nj fte's
+
+**2 regression difference in fte, ? why difference in standard errors?
+regress fte nj after njafter
+regress fte nj after njafter, robust
+
+twoway (scatter fte sheet) (lfit fte sheet if after==0) (lfit fte sheet if after==1), ytitle(# FTE) xtitle(restaurants) title(heteroskedasticity)
+graph twoway (scatter fte sheet if after==0 & nj==1) (scatter fte sheet if after==1 & nj==1), title(nj only prepost) legend (order(1 "Pre" 2 "post"))
+graph twoway (lfit fte after if nj==1)  (lfit fte after if nj==0) (lfit fte after) (lfit fte njafter), ytitle(# FTE's) title(Pre-->post Wage increase FTE) legend(order(1 "NJ" 2 "PA" 3 "All" 4 "NJ after"))
+
+**3 estimate with levels of fte to reduce the 
+sum fte
+
+egen levelfte = cut(fte), group(4)  //create 4 levels of fte as the outcome
+tab levelfte 
+table levelfte, contents(min fte max fte) 
+
+egen levelfte3 = cut(fte), group(3)  //create 3 levels of fte as the outcome
+tab levelfte3 
+table levelfte3, contents(min fte max fte) 
+
+regress levelfte nj after njafter
+regress levelfte nj after njafter, robust
+
+regress levelfte3 nj after njafter
+regress levelfte3 nj after njafter, robust
+
+**4 cluster on sheet
+regress levelfte3 nj after njafter, vce(cluster sheet)
+
+**5 fixed effects
+xtreg levelfte3 nj after njafter, fe
+
+save DinD_ex_ps4, replace
+
+use  "/Users/Owner/Documents/NYU/fall 2017/AEM/safesave_slim_data.dta"
+**TIKA = tx (tikapara and Kalyanpur) GE== comparison group (geneva)
+**outcome= loanbal (mean loan balances), monthyear (time period), trend (linear time trend) post = after Feb 2000
+
+tab TIKA GE
+
+twoway (lfit loanbal trend if TIKA==1 & monthyear < 200002) (lfit loanbal trend if GE==1 & monthyear < 200002) (lfit loanbal trend if TIKA==1 & monthyear >=200002) (lfit loanbal trend if GE==1 & monthyear >=200002), ytitle(Mean loan balances) legend(order(1 "tx pre" 2 "comp pre" 3 "tx post" 4 "comp post"))
+
+//pre treatment trend of tx and comp group
+regress loanbal trend if monthyear <200002 & TIKA==1
+regress loanbal trend if monthyear <200002 & TIKA==0
+
+
+regress loanbal trend TIKA if monthyear <200002 
+regress loanbal trend TIKA if monthyear >=200002 
+
+//pre to post trend/intercept/slope tx
+regress loanbal trend if monthyear <200002 & TIKA==1
+regress loanbal trend if monthyear >=200002 & TIKA==1 
+
+//pre to post trend/intercept/slope comp group
+regress loanbal trend if monthyear >=200002 & TIKA==0 
+regress loanbal trend if monthyear <200002 & TIKA==0
+
+//control for tinpr and nage and compare intercepts of tx and control
+regress loanbal trend tinpr nage if monthyear <200002 & TIKA==1 
+predict tx
+
+regress loanbal trend tinpr nage if monthyear <200002 & TIKA==0
+predict control
+
+twoway (lfit loanbal tx) (lfit loanbal control), ytitle(mean loan balances) title(Pretreatment Trends with more regressors) legend(order(1 "tx" 2 "control"))
+
+save safesavps5, replace
