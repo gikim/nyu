@@ -2,11 +2,13 @@
 *Grace Kim
 *gk1512
 *Working directory 
-cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+*cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+cd C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\replication
+
 *log file
-log using aem-rep-gk1512, replace
+log using aem-rep-gk1512-log, replace
 *Load dataset
-use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+use "raw pums80 slim.dta", clear
 ********************************************************************************************************
 ********************************************************************************************************
 *Mom File
@@ -33,7 +35,8 @@ save mom, replace
 ********************************************************************************************************
 *Dad File
 *File with married men
-use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+*use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+use "raw pums80 slim.dta", clear
 
 *Rename variables 
 rename sex dad_sex
@@ -88,7 +91,9 @@ save dad.dta, replace
 ********************************************************************************************************
 *Child
 *File with children
-use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+*use "C:\Users\gk1512\Documents\GK1512\AEM\replication\raw pums80 slim.dta", clear
+use "raw pums80 slim.dta", clear
+
 *Keep if under 17 years old, clear mom, no children, not married
 keep if age <= 17
 keep if us80a_momrule == 1
@@ -310,7 +315,9 @@ esttab using table2.csv, main(mean) aux(sd) unstack label append
 eststo clear
 
 *table 6 
-cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+*cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
+C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\replication
+
 *1
 eststo: quietly reg child3 same
 *2
