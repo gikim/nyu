@@ -347,7 +347,7 @@ eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherr
 eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace
 eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 boy2 black hispanic otherrace
 }
-esttab using table7.csv, p compress replace
+esttab using table7.csv, compress replace
 eststo clear
 
 log close
@@ -356,6 +356,8 @@ log close
 ********************************************************************************************************
 ********************************************************************************************************
 *notes
+*esttab using table7.csv, p compress replace
+
 
 *table 6 with outreg
 cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
