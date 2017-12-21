@@ -1,48 +1,223 @@
+*Set Working Directory
+*laptop: 
+*cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
+*desktop 
+*cd C:\Users\gk1512\Documents\GK1512\AEM
+cd C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\ps5
+****************************************************
+*Install packages
+ssc install binscatter
+ssc install addplot
+ssc install rd, replace
+****************************************************
+*START LOG FILE 
+log using ps5-log, replace
+****************************************************
+*AEM
+*PROBLEM SET #5
+*NAME: Grace Kim
+*NET ID: gk1512
+****************************************************
+use DinD_ex.dta, clear 
+
+*1. Mean differences to compute difference in means estimate of the change in minimum wage. 
+*differences in fte by nj or not nj 
+sum dfte
+ttest dfte, by(nj)
+*On average, there was a .1511 decrease in full-time employment for each store 
+*On average, NJ had an increase in full-time employment, of .28 per store, while non-New Jersey stores experienced an average decrease of 2 FTE. 
+
+sum fte
+ttest fte, by(after)
+
+*2. Estimated differences-in-differences using a regression model in differences. The LHS is change in outcome of interest. 
+*plain vanilla version
+reg fte nj after njafter
+outreg2 using ps5-table.xls, append ctitle("FTE") label
+
+*robust option 
+reg fte nj after njafter, r
+outreg2 using ps5-table.xls, append ctitle("FTE, Robust SE") label
+
+*The sizeable increase in the standard errors is due to the fact that there is heteroscedasticity of the standard errors. In other words, the impact of being in NJ, and the time period after the minimum wage increase, and the interaction between these two variables, varies by store. Thus, we must include robust standard errors to account for heteroscedasticity. 
+
+*3. Estimate following model in levels, i.e. with the LHS in levels.
+*Estimate two different versions of the model with different standard errors. 
+egen fte5 = cut(fte), group(5)
+reg fte5 nj njafter after
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels") label
+reg fte5 nj njafter after, r
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels, Robust SE") label
+
+*None of the coefficients are significant. 
+*No difference with the robust standard errors. 
+
+*4. Cluster on sheet
+reg fte5 nj njafter after, cluster(sheet)
+
+*For the dummy variable after, and the interation term nj*after, the standard errors clustered on sheet are smaller than the robust standard errors.  
+
+*5. Fixed effects
+xtset sheet
+xtreg fte5 nj njafter after, fe
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels, Fixed Effects") label
+
+* The NJ variable gets dropped since the fixed effects accounts for any variation unique to the New Jersey stores. 
+
+*6. The estimated impact of the minimum wage is the same in all these models. Across the models, the change in minimum wage led to an overall decrease in full-time employment, but an increase in FTE for stores in New Jersey. 
+
+*7. The graph demonstrates persistant increase in employment in the 7 counties in PA, compared to the 14 counties in PA and NJ. Thus, there a minimum wage increase may have a long-term impact in decreasing growth in employment. 
+save ps5-1-data, replace
+
+*8. Microfinance example 
+use safesave_slim_data.dta, clear
+sort monthyear
+
+*graphs
+global outcome loanbal
+global continuous trend
+global cutoff 13
+
+*magenta for TIKA
+*blue for nonTIKA 
+
+binscatter $outcome $continuous, rd($cutoff) linetype(none) lcolor(gs4) msymbol(oh) nbins(100) name(qfit, replace)
+addplot: (lfit $outcome $continuous if TIKA == 1 & $continuous < $cutoff, clcolor(magenta))
+addplot: (lfit $outcome $continuous if TIKA == 1 & trend >= $cutoff, clcolor(magenta))
+addplot: (lfit $outcome $continuous if TIKA == 0 & trend < $cutoff, clcolor(blue))
+addplot: (lfit $outcome $continuous if TIKA == 0 & trend >= $cutoff, clcolor(blue))
+
+*save graph 
+save ps5-8.gph, replace
+graph export "ps5-8.png", as(png) replace
+
+*The two lines look parallel before the interest rate change, and do not look parallel afterwards. 
+
+*Regression to test parallel trend assumption in the pre-period. 
+
+reg loanbal trend TIKA trend##TIKA if trend < 13 
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+*Check whether intercept or slope changed when the interest changed. 
+
+*tab monthyear 
+*tab trend
+gen interest_rate = 1 if trend >=13
+replace interest_rate = 0 if interest_rate == .
+tab trend if interest_rate == 1
+gen TIKA_interest_rate = TIKA*interest_rate
+
+xi: reg loanbal TIKA interest_rate TIKA##interest_rate
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+xi: reg loanbal trend TIKA interest_rate TIKA##interest_rate TIKA##trend
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+xi: reg loanbal trend TIKA TIKA##trend if trend >=13
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+***When assessing the impact on loan balances of being in the treatment group, the interest rate change and the interaction between being in the treatment group and the interest rate change, all of the coefficients are significant. 
+
+*Thus, the comparison & treatment branches have different level of loan balances (i.e. intercept) pre-interest rate change. The TIKA group started with higher loan balances in the beginning. 
+
+*For the TIKA group, the interest rate change led to significantly lower loan balances after the interest rate change. For the non TIKA group, the interest rate change led to significantly higher loan balances after the interest rate change. 
+
+*Does this change persist when you control for variables tinpr and nage? 
+
+xi: reg loanbal TIKA interest_rate TIKA_interest_rate nage tinpr 
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+xi: reg loanbal trend TIKA interest_rate TIKA##interest_rate nage tinpr 
+outreg2 using ps5-table-2.xls, append ctitle("Loan Balance") label
+
+reg loanbal TIKA interest_rate nage tinpr 
+capture drop loanbal_hat
+predict loanbal_hat
+
+twoway (lfit loanbal_hat trend if TIKA == 1 & trend <13,lcolor(emerald)) (lfit loanbal_hat trend if TIKA ==0 & trend <13, lcolor(cranberry)) (lfit loanbal_hat trend if TIKA == 1 & trend >= 13,lcolor(emerald)) (lfit loanbal_hat trend if TIKA ==0 & trend >= 13, lcolor(cranberry)), ytitle(mean loan balances) title(Loan Balances with Control Variables) legend(order(1 "TIKA" 2 "not-TIKA (control)"))
+
+graph save Graph "ps5-8-2.gph"
+graph export "ps5-8-2.png", as(png) replace
+
+twoway (lfit loanbal trend if TIKA == 1,lcolor(emerald)) (lfit loanbal trend if TIKA ==0, lcolor(cranberry)), ytitle(mean loan balances) title(Loan Balances) legend(order(1 "TIKA" 2 "not-TIKA (control)"))
+
+graph save Graph "ps5-8-3.gph"
+graph export "ps5-8-3.png", as(png) replace
+
+*When controlling for the time in the program and age of the borrower, the TIKA group actually has lower starting loan balances than the control group. However, the impact of the interest rate change remains the same in direction for the TIKA and non-TIKA group, such that the interest rate change leads to decreased loan balances in the TIKA group and increased loan balances in the non-TIKA group. 
+
+save ps5-2.dta, replace
+log close
+****************************************************
+
+*notes
+*older version of pset
+
 *AEM
 *PS5
 *Grace Kim
 *gk1512
 
-*cd
+*working directory
+*laptop: 
 *cd D:\GIKIM\AEM\PROBLEM-SETS\PS5
-cd C:\Users\gk1512\Documents\GK1512\AEM
+*desktop 
+*cd C:\Users\gk1512\Documents\GK1512\AEM
+cd C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\ps5
 
 log using ps5-log, replace
 use DinD_ex.dta, clear 
 
-*1. mean differences to compute difference in means estimate of the change in minimum wage. 
+*1. Mean differences to compute difference in means estimate of the change in minimum wage. 
 *differences in fte by nj or not nj 
+sum dfte
 ttest dfte, by(nj)
-sum dfte
-*nj had an increase, while pennsylvania decreased. 
+*On average, there was a .1511 decrease in full-time employment for each store 
+*On average, NJ had an increase in full-time employment, of .28 per store, while non-New Jersey stores experienced an average decrease of 2 FTE. 
 
+sum fte
 ttest fte, by(after)
-sum dfte
 
-
-*2. est diff in diff using regression model 
-reg dfte nj after njafter
+*2. Estimated differences-in-differences using a regression model in differences. The LHS is change in outcome of interest. 
+*plain vanilla version
+reg fte nj after njafter
+outreg2 using ps5-table.xls, append ctitle("FTE") label
 
 *robust option 
-reg dfte nj, r
+reg fte nj after njafter, r
+outreg2 using ps5-table.xls, append ctitle("FTE, Robust SE") label
 
-*3. estimate following model in levels, i.e. with LHS in levels. est. 2 versions of the model with different standard errors. 
-reg fte nj njafter after, r
+*The sizeable increase in the standard errors is due to the fact that there is heteroscedasticity of the standard errors. In other words, the impact of being in NJ, and the time period after the minimum wage increase, and the interaction between these two variables, varies by store. Thus, we must include robust standard errors to account for heteroscedasticity. 
 
-*4. cluster on sheet
-reg fte nj njafter after, cluster(sheet)
+*3. Estimate following model in levels, i.e. with the LHS in levels.
+*Estimate two different versions of the model with different standard errors. 
+egen fte5 = cut(fte), group(5)
+reg fte5 nj njafter after
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels") label
+reg fte5 nj njafter after, r
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels, Robust SE") label
 
-*5. fixed effects
+*None of the coefficients are significant. 
+*No difference with the robust standard errors. 
+
+*4. Cluster on sheet
+reg fte5 nj njafter after, cluster(sheet)
+
+*For the dummy variable after, and the interation term nj*after, the standard errors clustered on sheet are smaller than the robust standard errors.  
+
+*5. Fixed effects
 xtset sheet
-xtreg fte nj njafter after, fe
-xtreg fte nj, fe
+xtreg fte5 nj njafter after, fe
+outreg2 using ps5-table.xls, append ctitle("FTE-5 Levels, Fixed Effects") label
 
-*6.
+* The NJ variable gets dropped since the fixed effects accounts for any variation unique to the New Jersey stores. 
 
-*7. shows persistant increase in employment in the 7 counties in pA, compared to the 14 counties in PA and NJ. 
+*6. The estimated impact of the minimum wage is the same in all these models. Across the models, the change in minimum wage led to an overall decrease in full-time employment, but an increase in FTE for stores in New Jersey. 
 
-*8. 
+*7. The graph demonstrates persistant increase in employment in the 7 counties in PA, compared to the 14 counties in PA and NJ. Thus, there a minimum wage increase may have a long-term impact in decreasing growth in employment. 
+save ps5-1-data, replace
 
+*8. Microfinance example 
 use safesave_slim_data.dta, clear
 
 twoway (scatter loanbal trend if TIKA == 1, sort) (scatter loanbal trend if TIKA == 0, sort)
@@ -64,3 +239,21 @@ reg loanbal TIKA nage tinpr i.interest_rate TIKA_interest_rate
 
 save ps5-2.dta, replace
 log close
+
+
+
+*net install rdrobust, from(https://sites.google.com/site/rdpackages/rdrobust/stata) 
+xi: reg loanbal TIKA nage tinpr i.interest_rate TIKA##i.interest_rate
+reg loanbal TIKA nage tinpr i.interest_rate TIKA_interest_rate
+
+xi: reg loanbal i.TIKA i.interest_rate i.TIKA_interest_rate
+i.TIKA#i.interest_rate
+
+twoway (scatter loanbal trend if TIKA == 1, sort) (scatter loanbal trend if TIKA == 0, sort)
+twoway (scatter loanbal trend if TIKA == 1, sort) (scatter loanbal trend if TIKA == 0, sort) (lfit loanbal trend if TIKA == 1, yaxis(2)) (lfit loanbal trend if TIKA == 0, yaxis(2))
+save q8.gph, replace
+
+binscatter $outcome $continuous, rd($cutoff) linetype(none) lcolor(gs4) msymbol(oh) nbins(100) name(qfit, replace)
+
+addplot: (qfitci $outcome $continuous if $continuous<$cutoff, clcolor(magenta) ciplot(rline)) ///
+(qfitci $outcome $continuous if $continuous>$cutoff, clcolor(magenta) ciplot(rline))
