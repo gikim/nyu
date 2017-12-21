@@ -336,6 +336,37 @@ eststo clear
 foreach x in mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage lnfaminc{
 eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherrace
 eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace
+eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 black hispanic otherrace
+}
+*columns #4-6
+foreach x in mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage lnfaminc lnmom_nonwifeinc{
+eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherrace if married == 1 
+eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace if married == 1
+eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 black hispanic otherrace if married == 1
+}
+*columns 7-9
+foreach x in dad_workedpay dad_wkswork dad_uhrswork dad_incwage2{
+eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherrace
+eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace
+eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 black hispanic otherrace
+}
+esttab using table7.csv, se r2(4) compress replace
+eststo clear
+
+log close
+
+********************************************************************************************************
+********************************************************************************************************
+********************************************************************************************************
+*notes
+
+
+*table 7
+*with covariates: age agefirstchild boy1 boy2 black hispanic otherrace
+*columns #1-#3
+foreach x in mom_workedpay us80a_wkswork1 us80a_uhrswork mom_incwage lnfaminc{
+eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherrace
+eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace
 eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 boy2 black hispanic otherrace
 }
 *columns #4-6
@@ -353,12 +384,6 @@ eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 boy2 
 esttab using table7.csv, se r2(4) compress replace
 eststo clear
 
-log close
-
-********************************************************************************************************
-********************************************************************************************************
-********************************************************************************************************
-*notes
 *esttab using table7.csv, p compress replace
 
 
