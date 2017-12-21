@@ -1,0 +1,14 @@
+*beautiful soup
+
+working directory: 
+
+'C:\Users\gkim\Documents\GKIM\python'
+
+*python 3.6.3 documentation 
+
+>>> import os
+>>> os.getcwd()      # Return the current working directory
+'C:\\Python36'
+>>> os.chdir('/server/accesslogs')   # Change current working directory
+>>> os.system('mkdir today') 
+
