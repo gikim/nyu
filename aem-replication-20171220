@@ -4,12 +4,11 @@
 *Working directory 
 *cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
 cd C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\replication
-
+********************************************************************************************************
 *log file
 log using aem-rep-gk1512-log, replace
 *Load dataset
 use "raw pums80 slim.dta", clear
-********************************************************************************************************
 ********************************************************************************************************
 *Mom File
 *File with women, age 21-35, 2+ children  
@@ -65,7 +64,6 @@ rename us80a_uhrswork dad_uhrswork
 *Labor income
 rename us80a_incwage dad_incwage
 
-
 *Restrict dataset to men, married, not a widow
 keep if dad_sex == 1
 *Married
@@ -87,7 +85,6 @@ egen mom_id=concat(us80a_serial dad_sploc), punct("-")
 sort us80a_serial
 sort mom_id
 save dad.dta, replace
-********************************************************************************************************
 ********************************************************************************************************
 *Child
 *File with children
@@ -189,6 +186,7 @@ sort us80a_serial
 rename mom_id1 mom_id
 save child-reshape1, replace
 ********************************************************************************************************
+********************************************************************************************************
 *Merge: mom with child dataset
 use mom, clear
 *merge m:1 us80a_serial using child-reshape1.dta
@@ -258,7 +256,6 @@ replace married = 0 if us80a_marrno!=1
 replace married = 1 if married == .
 tab married
 
-
 *mom worked pay 
 gen mom_workedpay = 0 if us80a_wkswork1 == 0
 replace mom_workedpay = 1 if mom_workedpay == . 
@@ -302,7 +299,6 @@ save momchilddad.dta, replace
 ********************************************************************************************************
 ********************************************************************************************************
 use momchilddad.dta, clear
-
 eststo clear
 *table 2
 *1&2
@@ -316,7 +312,7 @@ eststo clear
 
 *table 6 
 *cd "C:\Users\gk1512\Documents\GK1512\AEM\replication\"
-C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\replication
+cd C:\Users\gkim\Documents\GKIM\gk1512\cw\aem\replication
 
 *1
 eststo: quietly reg child3 same
@@ -354,7 +350,7 @@ eststo: quietly reg `x' child3 age agefirstchild boy1 boy2 black hispanic otherr
 eststo: quietly ivreg `x' (child3 = same) age agefirstchild boy1 boy2 black hispanic otherrace
 eststo: quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 boy2 black hispanic otherrace
 }
-esttab using table7.csv, compress replace
+esttab using table7.csv, se r2(4) compress replace
 eststo clear
 
 log close
