@@ -1,12 +1,6 @@
-** Seemingly Unrelated Regressions **
+*Laszlo code 
 
-SETUP
-We are interested in estimating the following regressions for four firms in the Grunfeld data set. The data set includes 20 observations from 1935-1954 on the each firmӳ gross investment in plant and equipment, millions of $1947, inv, the value of each firmӳ common and preferred stock, millions of $1947, v, and each firmӳ capital stock of the firm, k. The firms are indicated by the numbers 4, 5, 6 or 7 at the end of the variables.  4 = Chrysler, 5 = Atlantic Richfield, 6 = IBM, 7 = Union Oil. Source: H. D. Vinod and A. Ullah, Recent Advances in Regression Models, Marcel Dekker, Inc., 1981, Table 10.1
- 
-			Eq(1) 	Inv4t  =  ?1  +  ?2 v4t   +   ?3 k4t   +  ?4t     t = 1, 2, Š20
-			Eq(2) 	Inv5t  =  ߱  +  ߲ v5t   +   ߳ k5t   +  ?5t     t = 1, 2, Š20
-			Eq(3) 	Inv6t  =  ?1  +   ?2 v6t   +   ?3 k6t   +  ?6t     t = 1, 2, Š20
-			Eq(4)  Inv7t  =  ?1  +   ?2 v7t   +   ?3 k7t   +   ?7t     t = 1, 2, Š20
+** Seemingly Unrelated Regressions **
 
 cd "D:\GIKIM\2018\econ-1102\lab"
 use gutest.dta
