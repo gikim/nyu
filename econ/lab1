@@ -1,0 +1,62 @@
+** Seemingly Unrelated Regressions **
+
+SETUP
+We are interested in estimating the following regressions for four firms in the Grunfeld data set. The data set includes 20 observations from 1935-1954 on the each firmӳ gross investment in plant and equipment, millions of $1947, inv, the value of each firmӳ common and preferred stock, millions of $1947, v, and each firmӳ capital stock of the firm, k. The firms are indicated by the numbers 4, 5, 6 or 7 at the end of the variables.  4 = Chrysler, 5 = Atlantic Richfield, 6 = IBM, 7 = Union Oil. Source: H. D. Vinod and A. Ullah, Recent Advances in Regression Models, Marcel Dekker, Inc., 1981, Table 10.1
+ 
+			Eq(1) 	Inv4t  =  ?1  +  ?2 v4t   +   ?3 k4t   +  ?4t     t = 1, 2, Š20
+			Eq(2) 	Inv5t  =  ߱  +  ߲ v5t   +   ߳ k5t   +  ?5t     t = 1, 2, Š20
+			Eq(3) 	Inv6t  =  ?1  +   ?2 v6t   +   ?3 k6t   +  ?6t     t = 1, 2, Š20
+			Eq(4)  Inv7t  =  ?1  +   ?2 v7t   +   ?3 k7t   +   ?7t     t = 1, 2, Š20
+
+cd "D:\GIKIM\2018\econ-1102\lab"
+use gutest.dta
+
+** Run the SUR regression
+
+sureg (inv4 v4 k4) (inv5 v5 k5) (inv6 v6 k6) (inv7 v7 k7)
+
+** Run individual regression and save residuals
+
+reg inv4 v4 k4
+predict res4, residuals
+
+reg inv5 v5 k5
+predict res5, residuals
+
+reg inv6 v6 k6
+predict res6, residuals
+
+reg inv7 v7 k7
+predict res7, residuals
+
+** Display the correlation matrix of the residuals
+
+ corr (res4 res5 res6 res7)
+ matrix rho = r(C)
+ matrix list rho
+** Create and display the LM statistic
+
+scalar LM = 20*(0.1135^2+0.2014^2+0.1562^2+(-0.1217)^2+0.1543^2+0.1348^2)
+di LM
+
+** Create and display the p-value for the LM statistic
+
+scalar LMp = chi2tail(6,LM)
+di LMp
+
+** Estimate the equations with a SUR model again and display the correlation matrix and the LM test
+
+sureg (inv4 v4 k4) (inv5 v5 k5) (inv6 v6 k6) (inv7 v7 k7), corr
+
+** Test the joint significance of the coefficients on the value of each firmӳ common and preferred stock, v
+
+test v4=v5=v6=v7=0
+
+** Test that the coefficients on the value of each firmӳ common and preferred stock, v, are all equal
+
+test v4=v5=v6=v7
+
+** Test that the coefficients on the value of each firmӳ common and preferred stock, v, are all equal to 0.10
+
+test v4=v5=v6=v7=0.10
+
