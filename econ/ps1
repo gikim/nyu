@@ -1,0 +1,70 @@
+*set working directory 
+cd C:\Users\gk1512\Documents\GK
+
+log using ps1-gk1512
+*ECON 1102
+*PROBLEM SET #1
+*GK1512
+
+*set working directory 
+cd C:\Users\gk1512\Documents\GK
+use cattle.dta
+
+generate a = _n
+save cattle-gk.dta, replace
+
+generate c1t = c1[_n-1]
+generate c2t = c2[_n-1]
+generate c3t = c3[_n-1]
+
+putexcel set "ec.xls", sheet("ps1")
+
+* Run individual regression and save residuals
+foreach x in 1 2 3{
+reg c`x' p`x' r`x' c`x't
+predict res`x', residuals 
+matrix reg`x' = r(table)
+}
+ 
+putexcel A1=matrix(reg1)
+putexcel A10=matrix(reg2)
+putexcel A20=matrix(reg3)
+
+sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t)
+matrix reg4 = r(table)
+putexcel A30=matrix(reg4)
+
+* Display the correlation matrix of the residuals
+corr (res1 res2 res3)
+matrix rho = r(C)
+matrix list rho
+
+** Create and display the LM statistic
+scalar r31=rho[3,1]
+disp r31
+
+scalar r21=rho[2,1]
+disp r21
+
+scalar r23=rho[2,3]
+disp r23
+
+*Create the LM statistic  
+scalar LM = 26*(r21^2+r31^2+r23^2)
+di LM
+
+** Create and display the p-value for the LM statistic
+scalar LMp = chi2tail(3,LM)
+di LMp
+
+** Estimate the equations with a SUR model again and display the correlation matrix and the LM test
+sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t), corr
+
+** Test the joint significance of the coefficients on the value of each firmӳ common and preferred stock, v
+test p1=p2=p3=0
+
+*Question 2
+cd C:\Users\gk1512\Documents\GK
+use fultonfish.dta
+
+
