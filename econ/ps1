@@ -11,8 +11,6 @@ cd C:\Users\gk1512\Documents\GK
 use cattle.dta
 
 generate a = _n
-save cattle-gk.dta, replace
-
 generate c1t = c1[_n-1]
 generate c2t = c2[_n-1]
 generate c3t = c3[_n-1]
@@ -63,8 +61,22 @@ sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t), corr
 ** Test the joint significance of the coefficients on the value of each firmӳ common and preferred stock, v
 test p1=p2=p3=0
 
+save cattle-gk.dta, replace
+*************************************************
 *Question 2
 cd C:\Users\gk1512\Documents\GK
-use fultonfish.dta
+use fultonfish.dta, clear
 
+*Demand equation 
+reg lquan lprice mon tue wed thu rainy cold
+*Supply Equation 
+reg lquan lprice stormy 
 
+*Structural form and reduced form 
+*lprice = 
+
+global demand "(qDemand: lquan lprice mon tue wed thu rainy cold)"
+global supply "(qSupply: lquan lprice stormy)"
+reg3 $demand $supply, endog(lprice)
+
+log close
