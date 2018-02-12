@@ -71,12 +71,46 @@ use fultonfish.dta, clear
 reg lquan lprice mon tue wed thu rainy cold
 *Supply Equation 
 reg lquan lprice stormy 
+reg lprice lquan stormy 
 
-*Structural form and reduced form 
+*2a. Structural form and reduced form 
+*Structural form equations represent a system of equations, and contain endogenous variables (variables determined by the system of equations), exogenous variables (variables determined outside of the system), and disturbance terms.  
+*Reduced form equations express endogenous variables as functions only of exogenous variables (and predetermined variables) and disturbances. The reduced form equations are the equations that result when we use the structural equations to solve for the endogenous variables.
+
+*The reduced form equations for this model are: 
 *lprice = 
+
+*2b. Reduced Form equations 
+reg c p w p1
+ivregress 2sls c p1 (p w = k1 t wg g a p1 x1)
+
+reg i p p1 k1
+ivregress 2sls i p1 k1 (p = k1 t wg g a p1 x1)
+
+reg wp x x1 a
+ivregress 2sls wp x1 a (x = k1 t wg g a p1 x1)
+
+reg3 (c p p1 w) (i p p1 k1) (wp x x1 a), endog(w p x) exog(t wg g)
+
+
+
+reg lprice mon tue wed thu rainy cold storm
+
+reg lquan mon tue wed thu rainy cold storm 
+
+ivregress 2sls lprice (lquan = mon tue wed thu rainy cold storm)
+ivregress 2sls lquan (lprice = mon tue wed thu rainy cold storm)
+
+sem (lquan <- lprice mon tue wed thu rainy cold) (lquan <- lprice stormy), cov(e.lquan*e.lquan)
 
 global demand "(qDemand: lquan lprice mon tue wed thu rainy cold)"
 global supply "(qSupply: lquan lprice stormy)"
-reg3 $demand $supply, endog(lprice)
+reg3 $demand $supply, endog(lquan lprice) exog(mon tue wed thu rainy cold stormy)
+
+reg3 (c p p1 w) (i p p1 k1) (wp x x1 a), endog(w p x) exog(t wg g)
+
+ivregress 2sls lquan mon tue wed thu rainy cold (lprice = stormy) 
+
+quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 black hispanic otherrace
 
 log close
