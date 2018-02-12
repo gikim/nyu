@@ -2,52 +2,64 @@
 cd C:\Users\gk1512\Documents\GK
 
 log using ps1-gk1512
-*ECON 1102
-*PROBLEM SET #1
-*GK1512
+* ECON 1102 
+* Problem Set #1
+* GK1512
 
 *set working directory 
 cd C:\Users\gk1512\Documents\GK
-use cattle.dta
 
+*Table
+putexcel set "ec.xls", sheet("ps1")
+
+*Question 1: Cattle Inventories 
+use cattle.dta, clear
+
+* 1a. OLS 
 generate a = _n
 generate c1t = c1[_n-1]
 generate c2t = c2[_n-1]
 generate c3t = c3[_n-1]
 
-putexcel set "ec.xls", sheet("ps1")
-
 * Run individual regression and save residuals
+capture drop res*
 foreach x in 1 2 3{
 reg c`x' p`x' r`x' c`x't
 predict res`x', residuals 
 matrix reg`x' = r(table)
-}
- 
+} 
 putexcel A1=matrix(reg1)
 putexcel A10=matrix(reg2)
 putexcel A20=matrix(reg3)
 
-sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t)
-matrix reg4 = r(table)
-putexcel A30=matrix(reg4)
+matrix list reg1 
+matrix list reg2 
+matrix list reg3
+
+* 1b. LM test
+* Null hypothesis: The disturbance terms of the individual regressions are not contemporaneously correlated. (i.e. zero contemporaneous covariance between the errors of different equations). 
+* Alternative hypothesis: The disturbance terms of the individual regressions are contemporaneously correlated. 
+
+* Test-statistic: Lagrange Multiplier (LM) statistic. LM is a sum of the squared correlations between the residuals. 
+* Distribution: The LM follows a chi-squared distribution with M(M-1)/2 degrees of freedom, where M is the number of equations. 
+* The LM statistic is multiplied by t, the number of observations, 26; in this case, t = 26. Since there are 3 equals, the LM statistic follows a chi-squared distribution with 3 degrees of freedom. 
+* Conclusion: Since the p-value is less than 0.01, at the 0.05 alpha level, we reject the null hypothesis that the regressions are not correlated. 
 
 * Display the correlation matrix of the residuals
 corr (res1 res2 res3)
-matrix rho = r(C)
-matrix list rho
+mat accum c = res1 res2 res3, nocons dev
+mat rho = corr(c)
+mat list rho
 
-** Create and display the LM statistic
+* Create and display the LM statistic
+scalar r21=rho[2,1]
+disp r21
+scalar r23=rho[2,3]
+disp r23
 scalar r31=rho[3,1]
 disp r31
 
-scalar r21=rho[2,1]
-disp r21
-
-scalar r23=rho[2,3]
-disp r23
-
-*Create the LM statistic  
+* Create the LM statistic  
 scalar LM = 26*(r21^2+r31^2+r23^2)
 di LM
 
@@ -55,15 +67,25 @@ di LM
 scalar LMp = chi2tail(3,LM)
 di LMp
 
-** Estimate the equations with a SUR model again and display the correlation matrix and the LM test
+* 1c. Seemingly Unrelated Regression technique. 
+*Form cross product matrix 
+sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t)
+matrix reg4 = r(table)
+putexcel A30=matrix(reg4)
+
+* Estimate the equations with a SUR model again and display the correlation matrix and the LM test
 sureg (c1 p1 r1 c1t) (c2 p2 r2 c2t) (c3 p3 r3 c3t), corr
 
-** Test the joint significance of the coefficients on the value of each firmӳ common and preferred stock, v
-test p1=p2=p3=0
-
+* See attached for table. 
+* 1d. Seemingly Unrelated Regression technique. 
+* In the attached table, the OLS vs. SUR technique led to different coefficients, standard errors, and p-values. 
+* For both techniques, most of the predictor variables were statistically significant in predicting present year cattle inventories. 
+* The primary difference is that the constants were statistically significant in the SUR technique but not in the OLS regressions. 
+ 
 save cattle-gk.dta, replace
 *************************************************
 *Question 2
+
 cd C:\Users\gk1512\Documents\GK
 use fultonfish.dta, clear
 
@@ -78,39 +100,122 @@ reg lprice lquan stormy
 *Reduced form equations express endogenous variables as functions only of exogenous variables (and predetermined variables) and disturbances. The reduced form equations are the equations that result when we use the structural equations to solve for the endogenous variables.
 
 *The reduced form equations for this model are: 
-*lprice = 
+*Set quantity from the supply and demand equations equal to each other. 
+*a1+a2*lprice+a3*mon+a4*tue+a5*wed+a6*thu+a7*rain+a8*cold+e_demand= 
+*b1+b2*lprice+b3storm+e_supply
+
+* We can solve for the log of price (lprice) in terms of the exogenous variables (mon, tues, wed, thu, rain, cold, stormy). 
+* Thus, lprice is in the general form: lprice = pi_1*x + v_1
+* We plug the equation for lprice back into the supply equation, to find the log of quantity (lquantity) in terms of the exogenous variables (mon, tues, wed, thu, rain, cold, stormy). 
+* Thus, lquan is in the general form: lquan = pi_2*x + v_2
 
 *2b. Reduced Form equations 
-reg c p w p1
-ivregress 2sls c p1 (p w = k1 t wg g a p1 x1)
+* Price
+reg lprice mon tue wed thu rainy cold stormy
+* Quantity 
+reg lquan mon tue wed thu rainy cold stormy
 
-reg i p p1 k1
-ivregress 2sls i p1 k1 (p = k1 t wg g a p1 x1)
+* For the price equation, only the coefficient on "stormy" is statistically significant. 
+* For the quantity equation, the coefficients on "tue", "wed", and "stormy" are statistically significant. 
 
-reg wp x x1 a
-ivregress 2sls wp x1 a (x = k1 t wg g a p1 x1)
+* 2c. The term "identification" refers to the number of reduced form coefficients to estimate the structural parameters of the equations. 
+* The demand equation is exactly identified; there are just enough reduced form coefficients to estimate the structural parameters of the demand equation. 
+* The supply equation is overidentified; there are 6 exogenous variables to predict the 1 endogenous variable. 
+ 
+* Demand Equation 
+ivregress 2sls lquan mon tue wed thu rainy cold (lprice = stormy)
 
-reg3 (c p p1 w) (i p p1 k1) (wp x x1 a), endog(w p x) exog(t wg g)
+* Supply Equation 
+ivregress 2sls lquan stormy (lprice = mon tue wed thu rainy cold) 
 
+* For the demand equation, the coefficient on lprice to predict lquan is -1.22, meaning that a higher price at equilibrium leads to lower quantity. Amongst the exogenous variables, "tue" and "wed" are statistically significant predictors of quantity. 
+* For the supply equation, the coefficient on lprice is -.15; the supply curve appears to be more inelastic than the demand curve. "Stormy" is not a significant predictor of quantity. 
 
-
-reg lprice mon tue wed thu rainy cold storm
-
-reg lquan mon tue wed thu rainy cold storm 
-
-ivregress 2sls lprice (lquan = mon tue wed thu rainy cold storm)
-ivregress 2sls lquan (lprice = mon tue wed thu rainy cold storm)
-
-sem (lquan <- lprice mon tue wed thu rainy cold) (lquan <- lprice stormy), cov(e.lquan*e.lquan)
-
+* Three-stage least-squares regression results 
 global demand "(qDemand: lquan lprice mon tue wed thu rainy cold)"
 global supply "(qSupply: lquan lprice stormy)"
 reg3 $demand $supply, endog(lquan lprice) exog(mon tue wed thu rainy cold stormy)
 
-reg3 (c p p1 w) (i p p1 k1) (wp x x1 a), endog(w p x) exog(t wg g)
-
-ivregress 2sls lquan mon tue wed thu rainy cold (lprice = stormy) 
-
-quietly ivreg `x' (child3 = twoboy twogirl) age agefirstchild boy1 black hispanic otherrace
-
 log close
+
+
+
+*notes
+sem (lquan <- lprice mon tue wed thu rainy cold) (lquan <- lprice stormy), cov(e.lquan*e.lquan)
+
+
+* Test the joint significance of the coefficients on the value of each firmӳ common and preferred stock, v
+test p1=p2=p3=0
+
+
+*Test: This is a test of the joint significance of the coefficients in predictors of cattle inventories for each region. 
+*Null hypothesis: 
+The null hypothesis is that the coefficient on the variable v in all four the equations are equal to zero. The alternative is that in at least one of the equations the coefficient on the variable v is not equal to zero.
+
+*Alternative Hypothesis:
+*Test-statistics
+*Distribution is chisquare with 3 and 
+* 
+
+
+** recovered file
+
+
+use cattle.dta, clear
+generate a = _n
+save ps1-cattle.dta, replace
+
+generate c1t = c1[_n-1]
+generate c2t = c2[_n-1]
+generate c3t = c3[_n-1]
+
+*browse if _n==1
+*browse if a==1
+
+*reg c1 p1 r1 c1t if _n != 1, r
+reg c1 p1 r1 c1t, r
+predict res1, residuals 
+reg c2 p2 r2 c1t, r
+predict res2, residuals 
+reg c3 p3 r3 c3t, r
+predict res3, residuals 
+
+* Correlation matrix of the residuals
+corr res1 res2 res3 
+
+*Form cross product matrix 
+mat accum c = res1 res2 res3, nocons dev
+mat rho = corr(c)
+mat list rho
+
+*Create a scalar for each correlation in the correlation matrix of the residuals
+scalar r31=rho[3,1]
+disp r31
+scalar r21=rho[2,1]
+disp r21
+scalar r41=rho[4,1]
+disp r41
+scalar r23=rho[2,3]
+disp r23
+scalar r24=rho[2,4]
+disp r24
+scalar r34=rho[3,4]
+disp r34
+
+*Create the LM statistic  
+scalar LM = 20*(r21^2+r31^2+r41^2+r23^2+r24^2+r34^2)
+*Display LM statistic 
+disp LM
+
+*Create and display a scalar with the p-value for the LM statistic 
+scalar LMp = chi2tail(6,LM)
+disp LMp
+
+*SUR regression 
+sureg (inv4 v4 k4) (inv5 v5 k5) (inv6 v6 k6) (inv7 v7 k7), corr
+reg inv4 v4 k4
+predict res4, residuals
+ 
+test v4=v5=v6=v7=0
+test v4=v5=v6=v7
+
