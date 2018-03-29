@@ -1,0 +1,5 @@
+doedit "C:\Users\gk1512\Documents\GK\ec-1102\Lab4.do" 
+*Problem Set #2
+cd C:\Users\gk1512\Documents\GK\ec-1102
+use phillips.dta, clear
+reg inf unem, r
