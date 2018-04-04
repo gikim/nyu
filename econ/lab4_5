@@ -1,0 +1,96 @@
+** Time series in Stata 
+clear
+
+cd C:\Users\gk1512\Documents\GK\ec-1102
+use spread1.dta
+
+generate spread=r20-rsq
+
+generate tt=_n
+*generate tt=-33+_n
+tsset tt, quarterly
+
+twoway connect spread tt
+tsline spread
+
+corrgram spread, lags(20)
+
+ac spread, lags(10)
+
+pac spread, lags(10)
+
+arima spread, ar(1/2)
+predict resid, residuals 
+estat ic
+corrgram resid, lags(10)
+ac resid
+
+wntestq resid
+
+arima spread, ar(1/3)
+predict resid1, residuals 
+estat ic
+
+actest spread, lags(10)
+
+Cumby-Huizinga test for autocorrelation
+  H0: disturbance is MA process up to order q
+  HA: serial correlation present at specified lags >q
+-----------------------------------------------------------------------------
+  H0: q=0 (serially uncorrelated)        |  H0: q=specified lag-1
+  HA: s.c. present at range specified    |  HA: s.c. present at lag specified
+-----------------------------------------+-----------------------------------
+    lags   |      chi2      df     p-val | lag |      chi2      df     p-val
+-----------+-----------------------------+-----+-----------------------------
+   1 -  1  |    180.715      1    0.0000 |   1 |    180.715      1    0.0000
+   1 -  2  |    183.354      2    0.0000 |   2 |     50.720      1    0.0000
+   1 -  3  |    183.356      3    0.0000 |   3 |     24.987      1    0.0000
+   1 -  4  |    183.546      4    0.0000 |   4 |     15.075      1    0.0001
+   1 -  5  |    183.692      5    0.0000 |   5 |      9.657      1    0.0019
+   1 -  6  |    183.717      6    0.0000 |   6 |      6.239      1    0.0125
+   1 -  7  |    183.749      7    0.0000 |   7 |      3.910      1    0.0480
+   1 -  8  |    183.989      8    0.0000 |   8 |      2.650      1    0.1035
+   1 -  9  |    184.005      9    0.0000 |   9 |      1.881      1    0.1702
+   1 - 10  |    184.563      10   0.0000 |  10 |      1.646      1    0.1995
+-----------------------------------------------------------------------------
+  Test requires conditional homoskedasticity
+
+* a Regress the variable spread on a constant  and save the residuals as e and 
+*   generate e2 = e*e.
+reg spread
+predict resid2, residuals 
+gen resid2sq = resid2^2
+
+* b. Conduct the following post estimation tests and write a 
+* statement that describes the null hypothesis for each test, 
+* whether or not you would reject the null hypothesis and your conclusion based 
+* on all three tests.
+* (b1) Breusch-Godfrey LM test for autocorrelation
+estat bgodfrey
+* (b2) LM test for autoregressive conditional heteroskedasticity (ARCH) using 
+* 3 lags
+reg resid2sq L(resid2) L(L(resid2)) L(L(L(resid2)))
+* (b3) Breusch-Pagan/Cook-Weisberg test for heteroskedasticity on the residuals 
+* using the iid option
+estat hettest
+* c Estimate the a GARCH (1,1) model 
+arch spread, arch(1) garch(1)
+
+* Lab 5 - stationarity
+
+
+twoway connect rsq tt
+twoway connect r20 tt
+twoway connect spread tt
+
+dfuller r20 
+dfuller rsq
+dfuller spread
+
+ac r20, lags(10)
+
+pac r20, lags(10)
+dfuller r20, regress lags(2)
+dfuller r20, regress lags(2) trend
+dfuller r20, regress lags(2) noconstant
+dfuller D.r20, regress lags(2)
