@@ -1,0 +1,63 @@
+* Cointegration and Stationarity - balance2.dta
+
+* Check if they are stationary -  we need at least I(1) processes
+dfuller y,regress lags(5)
+dfuller i,regress lags(5)
+dfuller c,regress lags(5)
+* Check if they are I(2)
+dfuller D.y, regress lags(5)
+dfuller D.i, regress lags(5)
+dfuller D.c, regress lags(5)
+* Check if they are I(3)
+dfuller D.D.y, regress lags(5)
+dfuller D.D.i, regress lags(5)
+dfuller D.D.c, regress lags(5)
+* Seems like they are at least I(1) but potentially I(2)
+
+
+* If we have exactly one cointegrating relationship then this regression is 
+* superconsistent:
+reg y i c
+predict res1, residuals
+* Check manually how the residuals behave:
+
+
+estat bgodfrey
+
+wntestq res1
+arima res1 , arima(1,0,1)
+* Massive autocorrelation!!! (could be a sign of non-stationarity)
+prais y i c
+prais y i c, corc
+
+* Even more suspicious - perform dfuller 
+
+dfuller res1,regress lags(5)
+* Do Johansen test
+vecrank y i c
+vecrank y i c, lags(5)
+vecrank y i c, lags(5) level99
+vecrank y i c, lags(5) max levela notrace
+vecrank y i c, lags(5) ic
+
+* probably not stationary
+vecrank D.y D.i D.c, lags(5) level99
+reg D.y D.i D.c
+predict res2, residuals
+dfuller res2,regress lags(5)
+
+* Estimate VAR
+
+use http://www.stata-press.com/data/r13/txhprice ,clear
+varsoc dallas houston
+var dallas houston, lags(1/2)
+irf create order1, step(10) set(myirf1)
+irf graph oirf, impulse(dallas) response(houston)
+irf table fevd, impulse(dallas) response(houston)
+vargranger
+*svar 
+vec dallas houston, lags(2)
+vecrank dallas houston
+varsoc austin dallas houston sa
+vecrank austin dallas houston sa, lag(3)
+vec austin dallas houston sa, lags(3) rank(2) noetable
