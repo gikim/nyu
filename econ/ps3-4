@@ -1,0 +1,73 @@
+clear all 
+cd \\apporto.com\dfs\Users\gk1512\Desktop\
+
+log using ps3-gk1512
+
+*Problem Set 3
+*Question 1: Great Moderation
+*a. Load the Great Moderation data of output, inflation and the interest rate. Generate a time variable and set the time period start from the first quarter of 1983 at the quarterly frequency.
+
+clear all 
+use greatmoderation.dta, clear
+gen time = _n
+generate date = tq(1983q1) + _n-1 
+format %tq date 
+tsset date
+
+*b. Plot the variables on one graph and assess whether you expect these variables to be stationary or cointegrated? Can they be both?
+
+graph twoway (scatter GDP date) (scatter INFL date) 
+graph twoway (line GDP date) (line INFL date) 
+
+*c. Using Dickey Fuller test with 2 lags, check the level of integration for each variable. (Hint: take time differences until you have stationary data).
+
+*From lab6. 
+*Check if stationary I(1) processes.
+
+dfuller GDP, regress lags(5) 
+dfuller INFL, regress lags(5) 
+
+*Check I(2).
+dfuller D.GDP, regress lags(5)
+dfuller D.INFL, regress lags(5)
+
+*Check I(3).
+dfuller D.D.GDP, regress lags(5)
+dfuller D.D.INFL, regress lags(5)
+
+*d. Estimate a VAR model with 1 lag and 2 lags and make sure all your variables have the same level of integration! Which VAR would you pick and why?
+
+*Co-integrating relationship. 
+*Superconsistent:
+
+reg GDP INFL
+predict res1, residuals
+reg INFL GDP
+predict res2, residuals
+
+prais GDP INFL
+prais GDP INFL, corc
+
+prais INFL GDP
+prais INFL GDP, corc
+
+*e. Perform the Johansen test on inflation and the interest rate and based on your result, estimate the Vector error correction model. Specify, (if any) a long run equilibrium relationship for the variables. Interpret the results.
+
+*Johansen 
+vecrank GDP INFL
+vecrank INFL GDP
+
+*f. Regress the inflation rate on the interest rate and conduct a cointegration test manually using dfuller. Compare the cointegrating relationship to the result in exercise e.
+
+*Inflation
+*Co-integration
+
+
+log close 
+
+*pset 4
+use crime.dta
+
+*notes
+
+gen quarter = str(right(time_4, 4))
