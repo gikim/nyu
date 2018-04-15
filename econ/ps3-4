@@ -17,6 +17,7 @@ tsset date
 *b. Plot the variables on one graph and assess whether you expect these variables to be stationary or cointegrated? Can they be both?
 
 graph twoway (scatter GDP date) (scatter INFL date) 
+
 graph twoway (line GDP date) (line INFL date) 
 
 *c. Using Dickey Fuller test with 2 lags, check the level of integration for each variable. (Hint: take time differences until you have stationary data).
@@ -37,6 +38,15 @@ dfuller D.D.INFL, regress lags(5)
 
 *d. Estimate a VAR model with 1 lag and 2 lags and make sure all your variables have the same level of integration! Which VAR would you pick and why?
 
+
+*e. Perform the Johansen test on inflation and the interest rate and based on your result, estimate the Vector error correction model. Specify, (if any) a long run equilibrium relationship for the variables. Interpret the results.
+
+*Johansen 
+vecrank GDP INFL
+vecrank INFL GDP
+
+*f. Regress the inflation rate on the interest rate and conduct a cointegration test manually using dfuller. Compare the cointegrating relationship to the result in exercise e.
+
 *Co-integrating relationship. 
 *Superconsistent:
 
@@ -51,22 +61,49 @@ prais GDP INFL, corc
 prais INFL GDP
 prais INFL GDP, corc
 
-*e. Perform the Johansen test on inflation and the interest rate and based on your result, estimate the Vector error correction model. Specify, (if any) a long run equilibrium relationship for the variables. Interpret the results.
-
-*Johansen 
-vecrank GDP INFL
-vecrank INFL GDP
-
-*f. Regress the inflation rate on the interest rate and conduct a cointegration test manually using dfuller. Compare the cointegrating relationship to the result in exercise e.
 
 *Inflation
 *Co-integration
 
+reg GDP INFL 
+
 
 log close 
 
+
 *pset 4
+
 use crime.dta
+
+*Q1: Criminal Activity and Probability of Arrest. The data in crime.dta consists of 2; 725 men who were arrested prior to 1986 and were born in either 1960 or 1961 in California. Consider the following model of the probability of arrest based on prior criminal activity: 
+*arr86i = b0 + b1pcnvi + b2avgseni + b3tottimei + b4ptime86i + b5qemp86i + ui, where arr86i is 1 if an individual was arrested in 1986 and 0 otherwise, pcnvi is the proportion of prior arrests that led to a conviction, avgseni is the average sentence served from prior convictions (in months), tottimei is months spent in prison since age 18 prior to 1986, ptime86i is time spent in prison in 1986 and qemp86i is the number of quarters (0 to 4) that the individual was legally employed in 1986.
+*a. What is the average number of arrests in 1986? What is the median number of arrests in 1986?
+
+
+
+*b. All variables from our model above are in the dataset except arr86i. Construct a binary variable equal to 1 if an individual was arrested in 1986 and equal to 0 if otherwise. What proportion of men in the sample were arrested in 1986?
+
+
+
+*c. Estimate the model using OLS and report the estimated coecients and standard errors. Why are the standard errors incorrect?
+
+*d. Estimate the model using FGLS, using the OLS output from the previous question as your first stage. Follow the steps outlined in the lab. Recall that when you do the transformation of your model, the constant will be dierent for each individual.
+
+*e. Estimate the model using Probit.
+
+*f. Why can’t we look at the Stata output directly after doing a Probit to assess the eect associated with the various explanatory variables?
+
+*g. Calculate the marginal eects at the mean for each explanatory variable.
+
+
+
+*h. Calculate the average marginal eect for each explanatory variable.
+
+
+
+*i. Compare the coecient estimate for pcnvi from the linear probability model; the marginal effect of pcnvi evaluated at the mean; and the average marginal eect of pcnvi and comment.
+
+
 
 *notes
 
