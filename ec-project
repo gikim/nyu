@@ -1,6 +1,31 @@
+use "C:\Users\gk1512\Documents\GK\ec-1102\project\usa_00003_2010.dta" 
+tab gchouse
+tab multgen
+tab multgend
+
+tab bpl
+
+reg gchouse educ
+tab gchouse
+sum gchouse
+
+sum if gchouse == 1
+
+reg gchouse poverty
+tab poverty
+sum incearn
+sum gchouse if gchouse == 1
+tab gchouse
+sum gchouse if gchouse == 0
+sum gchouse if gchouse == 2
+tab gcrespon
+
+
 use "C:\Users\gk1512\Documents\GK\ec-1102\project\2010+2015 Multigen_foranalysis.dta" 
 tab gcrespon
 tab gcrespon, label
+
+
 tab gcrespon, nolabel
 
 gen gcrespon2 = 1 if gcrespon==2
@@ -16,6 +41,7 @@ replace ins = 0 if hcovany==1
 tab poverty
 tab diffcare, nolabel
 tab diffcare, label
+
 gen diffcare2 = 1 if diffcare==2
 replace diffcare2 = 0 if diffcare==1
 reg sei gcrespon2
@@ -33,3 +59,7 @@ tab school
 tab poverty
 
 reg poverty gcrespon2
+
+tab school, nolabel
+gen school2=1 if school==2
+replace school2=0 if school==1
