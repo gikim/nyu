@@ -25,3 +25,11 @@ local difficulty diffrem diffphys diffmob diffcare diffsens diffeye diffhear
 foreach x in `difficulty'{
 reg `x' gcrespon2
 }
+
+tab hcovany, nolabel
+tab hcovany, label
+tab ins
+tab school
+tab poverty
+
+reg poverty gcrespon2
