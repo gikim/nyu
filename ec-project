@@ -63,3 +63,9 @@ reg poverty gcrespon2
 tab school, nolabel
 gen school2=1 if school==2
 replace school2=0 if school==1
+
+reg inctot gcrespon
+tab gchouse
+tab gchouse, nolabel
+
+ivprobit gcrespon (gchouse=loginc)
