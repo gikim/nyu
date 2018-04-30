@@ -1,0 +1,27 @@
+use "C:\Users\gk1512\Documents\GK\ec-1102\project\2010+2015 Multigen_foranalysis.dta" 
+tab gcrespon
+tab gcrespon, label
+tab gcrespon, nolabel
+
+gen gcrespon2 = 1 if gcrespon==2
+replace gcrespon2 = 0 if gcrespon==1
+reg sei gcrespon2
+tab sei
+
+tab hcovany
+tab school
+tab hcovany, nolabel
+gen ins = 1 if hcovany==2
+replace ins = 0 if hcovany==1
+tab poverty
+tab diffcare, nolabel
+tab diffcare, label
+gen diffcare2 = 1 if diffcare==2
+replace diffcare2 = 0 if diffcare==1
+reg sei gcrespon2
+
+probit diffcare2 gcrespon2
+local difficulty diffrem diffphys diffmob diffcare diffsens diffeye diffhear
+foreach x in `difficulty'{
+reg `x' gcrespon2
+}
