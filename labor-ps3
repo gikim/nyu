@@ -38,7 +38,56 @@ local a1,a2,b1,b2,h1_hat,h2_hat,h1,h2;
 
 /* if there are two Nash equilibria (one person in, one person out) choose the one in which the husband works */
 
-a1=(1-lam1)
+a1=(1-lam1)*cap_t-lam1*y/w1;
+a2=lam1*w2/w1;
+b1=(1-lam2)*cap_t-lam2*y/w2;
+b2=lam2*w1/w2;
+
+h1=(a1-a2*b1)/(1-a2*b2);
+h2=(b1-b2*a1)/(1-a2*b2);
+
+if h1 gt 0 and h2 gt 0;
+h1_hat = h1;
+h2_hat - h2;
+
+elseif h1 gt 0 and h2 le 0;
+h1_hat = a1;
+h2_hat = 0; 
+
+elseif h1 le 0 and h2 gt 0;
+  if a1 gt 0; 
+    h1_hat = a1; 
+    h2_hat = 0;
+  else;
+    h1_hat = 0;
+    h2_hat = b1; 
+  endif; 
+else; 
+  h1_hat = 0;
+  h2_hat = 0; 
+ endif;
+ retp(h1_hat, h2_hat)'
+ endp;
+ 
+ /* create data set */ 
+ mc_data = zeros(n_r,5)'
+ i=1;
+ do until i gt n_r;
+ {h1_hat, h2_hat}=nash_solve(lambda1[i],lambda2[i],x[i,2],x[i,4],x[i,5]);
+
+mc_data[i,1]=h1_hat;
+mc_data[i,2]=x[i,2];
+
+mc_data[i,3]=h2_hat;
+mc_data[i,4]=x[i,4];
+mc_data[i,5]=x[i,5];
+i=i+1;
+endo;
+
+h_1 = mc_data[.,1];w_1=mc_data[.,2];h_2=mc_data[.,3];w_2=mc_data[.,4];y=mc_data[.,5];
+
+/* now turn to simulation estimation exercises */
+n_sims = 100;
 
 
 
