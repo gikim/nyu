@@ -1,0 +1,2 @@
+#labor problem set 
+mydata <- read.table("c:/mydata.txt", header=TRUE, sep=",", row.names="id")
