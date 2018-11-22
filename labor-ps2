@@ -1,0 +1,766 @@
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and export to LaTeX again.
+
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{epstopdf}
+\usepackage{matlab}
+
+\sloppy
+\epstopdfsetup{outdir=./}
+\graphicspath{ {./PS2gk_images/} }
+
+\begin{document}
+
+\matlabtitle{Grace Kim /// Problem Set \#2}
+
+\begin{matlabcode}
+%%Import the data
+filename='cps_2014_data.TXt';
+delimiterIn = ' ';
+headerlinesIn = 0;
+CPS = importdata(filename,delimiterIn,headerlinesIn);
+[m,n]=size(CPS);
+
+%% CREATE FILE for employed 
+CPS_e=[];
+for i=1:m
+    if CPS(i,3)==0
+       CPS_e=[CPS_e;CPS(i,:)];
+    end
+end
+[m_e,n_e]=size(CPS_e);
+min_CPS_e = min(CPS_e);
+
+%% CREATE FILE FOR UNEMPLOYED 
+CPS_u=[];
+for i=1:m
+    if CPS(i,3)>0
+       CPS_u=[CPS_u;CPS(i,:)];
+    end
+end
+[m_u,n_u]=size(CPS_u);
+%Convert to months
+CPS_u_mo = CPS_u/4.333;
+
+%%Define parameters: we,N,Nu,tu,w_star
+%%Vector of wages for both employed and unemployed
+w=CPS(:,2);
+%Sum of wages for employed
+w_sum=sum(CPS(:,2));
+%vector for the employed in TX 
+we=CPS_e(:,2);
+%Sum of wages 
+sum(we);
+%Total # people in dataset 
+N=m;
+% # unemployed
+Nu=m_u;
+%Monthly duration of unemployment  
+%Total time unemployed in months 
+tu=sum(CPS_u_mo(:,3));
+%Weekly duration of unemployment 
+%Total time unemployed in weeks;
+tu_wk=sum(CPS_u(:,3));
+%Reservation wage, the minimum wage for which a job will be offered
+w_star=min_CPS_e(2);
+
+%% CREATE TEXAS FILE
+CPS_TX=[];
+for i=1:2364
+    if CPS(i,1)==48
+       CPS_TX=[CPS_TX;CPS(i,:)];
+    end
+end
+[m_TX,n_TX]=size(CPS_TX);
+
+%% CREATE TX FILE for employed 
+CPS_TX_e=[];
+for i=1:m_TX
+    if CPS_TX(i,3)==0
+       CPS_TX_e=[CPS_TX_e;CPS_TX(i,:)];
+    end
+end
+[m_TX_e,n_TX_e]=size(CPS_TX_e);
+min_CPS_TX_e = min(CPS_TX_e);
+
+%% CREATE TX FILE for unemployed 
+CPS_TX_u=[];
+for i=1:m_TX
+    if CPS_TX(i,3)>0
+       CPS_TX_u=[CPS_TX_u;CPS_TX(i,:)];
+    end
+end
+[m_TX_u,n_TX_u]=size(CPS_TX_u);
+%Convert to months
+CPS_TX_u_mo = CPS_TX_u/4.333;
+
+%%Define parameters: we,N,Nu,tu,w_star
+%%Wages
+%%Vector of wages for both employed and unemployed
+w_TX=CPS_TX(:,2);
+%Sum of wages for employed
+w_TX_sum=sum(CPS_TX(:,2));
+%vector for the employed in TX 
+we_TX=CPS_TX_e(:,2);
+%Sum of wages 
+sum(we_TX);
+%Total # people in dataset 
+N_TX=m_TX;
+%TX # unemployed: Nu_TX
+Nu_TX=m_TX_u;
+%Monthly duration of unemployment  
+%Total time unemployed in months 
+tu_TX=sum(CPS_TX_u_mo(:,3));
+%Weekly duration of unemployment 
+%Total time unemployed in weeks;
+tu_TX_wk=sum(CPS_TX_u(:,3));
+%Reservation wage, the minimum wage for which a job will be offered
+w_star_TX=min_CPS_TX_e(2);
+
+%%%CA
+%CREATE CA FILE
+CPS_CA=[];
+for i=1:2364
+    if CPS(i,1)==6
+       CPS_CA=[CPS_CA;CPS(i,:)];
+    end
+end
+[m_CA,n_CA]=size(CPS_CA);
+
+%CREATE CA FILE FOR EMPLOYED 
+CPS_CA_e=[];
+for i=1:m_CA
+    if CPS_CA(i,3)==0
+       CPS_CA_e=[CPS_CA_e;CPS_CA(i,:)];
+    end
+end
+[m_CA_e,n_CA_e]=size(CPS_CA_e);
+size(CPS_CA_e);
+min(CPS_CA_e);
+max(CPS_CA_e);
+min_CPS_CA_e = min(CPS_CA_e);
+
+%% CREATE CA FILE FOR UNEMPLOYED 
+CPS_CA_u=[];
+for i=1:m_CA
+    if CPS_CA(i,3)>0
+       CPS_CA_u=[CPS_CA_u;CPS_CA(i,:)];
+    end
+end
+[m_CA_u,n_CA_u]=size(CPS_CA_u);
+size(CPS_CA_u);
+min(CPS_CA_u);
+max(CPS_CA_u);
+%Convert to months
+CPS_CA_u_mo = CPS_CA_u/4.333;
+
+%%Define parameters: we,N,Nu,tu,w_star
+%%Vector of wages for both employed and unemployed
+w_CA=CPS_CA(:,2);
+%Sum of wages for employed
+w_CA_sum=sum(CPS_CA(:,2));
+%vector for the employed in CA 
+we_CA=CPS_CA_e(:,2);
+%Sum of wages 
+sum(we_CA);
+%Total # people in dataset 
+N_CA=m_CA
+\end{matlabcode}
+\begin{matlaboutput}
+N_CA = 1458
+\end{matlaboutput}
+\begin{matlabcode}
+%# unemployed
+Nu_CA=m_CA_u
+\end{matlabcode}
+\begin{matlaboutput}
+Nu_CA = 226
+\end{matlaboutput}
+\begin{matlabcode}
+%Monthly duration of unemployment  
+%Total time unemployed in months 
+tu_CA=sum(CPS_CA_u_mo(:,3));
+%Weekly duration of unemployment 
+%Total time unemployed in weeks;
+tu_CA_wk=sum(CPS_CA_u(:,3));
+%Reservation wage, the minimum wage for which a job will be offered
+w_star_CA=min_CPS_CA_e(2)
+\end{matlabcode}
+\begin{matlaboutput}
+w_star_CA = 8
+\end{matlaboutput}
+\begin{matlabcode}
+
+%%% Question #1
+%%% TX 
+%%Exponential distribution
+%function has y_TX with the parameters, wage employed, N, Number unemployed, time unemployed, w
+%star = reservation wage
+%Set y as a vector with the parameters
+%y(1) is log(lambda); y(2) is log(eta) and y(3) is log(alpha)
+%objfun2
+%exponential function 
+%exppdf
+%from page 10 on workbook
+%negative log likelihood function because we are minimizing the function 
+
+%y(1) is log(lambda); y(2) is log(eta) and y(3) is log(alpha)
+y0=[1,0,-1]; %starting guess
+options=optimoptions(@fminunc,'Algorithm','quasi-newton');
+options.Display='iter';
+f_real=@(y_TX)objfun2(y_TX,we_TX,N_TX,Nu_TX,tu_TX,w_star_TX);
+[y_TX,fval,exitflag,output, grad, hessian] = fminunc(f_real,y0,options);
+\end{matlabcode}
+\begin{matlaboutput}
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0           4          3727.46                      2.14e+03
+     1           8          3088.24    0.000467527            643  
+     2          12           2950.3              1            330  
+     3          16          2868.43              1            320  
+     4          20          2816.69              1            290  
+     5          24          2586.89              1             61  
+     6          28          2572.01              1           62.2  
+     7          32          2566.03              1             77  
+     8          36          2561.51              1           81.3  
+     9          40          2552.61              1           78.7  
+    10          44          2541.64              1           62.7  
+    11          48           2532.4              1           42.1  
+    12          52           2528.2              1           22.2  
+    13          56          2527.62              1           1.93  
+    14          60          2527.59              1          0.972  
+    15          64          2527.59              1          0.463  
+    16          68          2527.59              1          0.106  
+    17          72          2527.59              1        0.00345  
+    18          76          2527.59              1        0.00132  
+
+Computing finite-difference Hessian using objective function.
+
+Local minimum found.
+
+Optimization completed because the size of the gradient is less than
+the default value of the optimality tolerance.
+
+<stopping criteria details>
+\end{matlaboutput}
+\begin{matlabcode}
+negexp_TX=exp(y_TX);
+lambda_exp_TX=negexp_TX(1,1);
+eta_exp_TX=negexp_TX(1,2);
+alpha_exp_TX=negexp_TX(1,3);
+
+% Asymptotic standard errors
+    % With MLE, under assumptions,
+        % If model is correctly specified: Var(theta_hat_mle) = hessian^1
+hessian;
+inv_hessian = inv(hessian);
+err = sqrt(diag(inv(hessian)));
+%standard errors estimate for TX 
+se_negexp_TX = 0;
+%TX_negexp_se for lambda/eta/alpha
+se_negexp_TX(1)=sqrt((lambda_exp_TX^2)*(err(1)));
+se_negexp_TX(2)=sqrt((eta_exp_TX^2)*(err(2)));
+se_negexp_TX(3)=sqrt((alpha_exp_TX^2)*(err(3)));
+
+%Recovering b
+rho=0.005;
+N_int = inf;
+f_exp_TX=@(z)(z-w_star_TX).*exppdf(z,(1/alpha_exp_TX));
+int_exp_TX=integral(f_exp_TX,w_star_TX,N_int);
+b_exp_TX=w_star_TX -(lambda_exp_TX/(rho+eta_exp_TX))*int_exp_TX;
+
+%%%Lognormal distribution
+%log normal distribution 
+%cdf of a log normal distribution regular cdf 
+%log of log normal is just the normal distribution 
+
+x0=[-0.7,-1.6,3,2.4]; 
+%starting guess
+%x(1) is log(lambda); x(2) is log(eta); x(3) is log(sigma^2) and x(4) is
+%log(mu)
+%lambda, eta, sigma, mu 
+options=optimoptions(@fminunc,'Algorithm','quasi-newton');
+options.Display='iter';
+f_real=@(x_TX)objfun(x_TX,we_TX,N_TX,Nu_TX,tu_TX,w_star_TX);
+[x_TX,fval,exitflag,output, grad, hessian]=fminunc(f_real,x0,options);
+\end{matlabcode}
+\begin{matlaboutput}
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0           5          3640.16                           507
+Objective function returned Inf; trying a new point...
+     1          32          657.792     0.00627484             65  
+     2          42          655.103       0.118703           77.9  
+     3          52          652.764       0.147993           45.6  
+     4          57          650.127              1           11.4  
+     5          62          647.552              1           22.6  
+     6          72          641.373       0.665058             90  
+     7          82          639.892            0.5            121  
+     8          87          633.485              1            150  
+     9          92          619.496              1           55.9  
+    10         102          618.774        0.27019            207  
+    11         112          615.953       0.513822           20.4  
+    12         117          615.928              1           13.7  
+    13         122          615.915              1           1.16  
+    14         127          615.915              1          0.104  
+    15         132          615.915              1          0.107  
+    16         137          615.915              1          0.026  
+    17         142          615.915              1        0.00138  
+    18         147          615.915              1       8.39e-05  
+
+Computing finite-difference Hessian using objective function.
+
+Local minimum found.
+
+Optimization completed because the size of the gradient is less than
+the default value of the optimality tolerance.
+
+<stopping criteria details>
+\end{matlaboutput}
+\begin{matlabcode}
+lognorm_TX=exp(x_TX);
+lambda_lognorm_TX=lognorm_TX(1,1);
+eta_lognorm_TX=lognorm_TX(1,2);
+sigma_lognorm_TX=lognorm_TX(1,3);
+mu_lognorm_TX=lognorm_TX(1,4);
+
+% Asymptotic standard errors
+    % With MLE, under assumptions,
+        % If model is correctly specified: Var(theta) = hessian^1
+hessian;
+inv_hessian = inv(hessian);
+err = sqrt(diag(inv(hessian)));
+%standard errors estimate 
+se_lognorm_TX = 0;
+se_lognorm_TX(1)=sqrt((lambda_lognorm_TX^2)*(err(1)));
+se_lognorm_TX(2)=sqrt((eta_lognorm_TX^2)*(err(2)));
+se_lognorm_TX(3)=sqrt((sigma_lognorm_TX^2)*(err(3)));
+se_lognorm_TX(4)=sqrt((mu_lognorm_TX^2)*(err(4)));
+        
+%Recovering b
+%keeping wage as z
+rho=0.005;
+N_int=Inf;
+dens_ln_TX=@(z)normpdf((log(z)-mu_lognorm_TX)/sigma_lognorm_TX).*(1./(sigma_lognorm_TX.*z));
+f_lognorm_TX=@(z)(-w_star_TX+z).*dens_ln_TX(z);
+int_lognorm_TX=integral(f_lognorm_TX,w_star_TX,N_int);
+b_lognorm_TX=w_star_TX -(lambda_lognorm_TX/(rho+eta_lognorm_TX))*int_lognorm_TX; 
+%pt6 pg 9 in notes
+
+%%%CA
+%%Lognormal distribution
+x0=[-0.7,-1.6,3,2.4]; %starting guess
+%x(1) is log(lambda); x(2) is log(eta); x(3) is log(sigma^2) and x(4) is
+%log(mu)
+options=optimoptions(@fminunc,'Algorithm','quasi-newton');
+options.Display='iter';
+f_real=@(x_CA)objfun(x_CA,we_CA,N_CA,Nu_CA,tu_CA,w_star_CA);
+[x_CA,fval,exitflag,output, grad, hessian]=fminunc(f_real,x0,options);
+\end{matlabcode}
+\begin{matlaboutput}
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0           5          5862.18                           756
+Objective function returned Inf; trying a new point...
+     1          32          1271.92     0.00411315            521  
+     2          42          1212.61       0.149967            529  
+     3          52          1123.44       0.363035            622  
+     4          62          1091.24       0.405227            139  
+     5          67          1085.79              1            140  
+     6          72          1083.65              1           33.5  
+     7          77          1083.37              1            6.3  
+     8          82           1083.1              1           16.9  
+     9          87          1082.96              1           11.4  
+    10          92          1082.87              1           4.43  
+    11          97          1082.75              1           17.4  
+    12         102          1082.53              1           47.8  
+    13         107          1082.22              1           56.3  
+    14         112          1081.49              1           46.2  
+    15         117           1081.1              1           39.1  
+    16         122          1080.51              1             21  
+    17         132          1080.33       0.298741           47.1  
+    18         137          1080.22              1           3.44  
+    19         142          1080.18              1              3  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    20         147          1080.17              1           4.02  
+    21         152          1080.17              1          0.318  
+    22         157          1080.17              1         0.0459  
+    23         162          1080.17              1          0.008  
+    24         172          1080.17        0.35161        0.00427  
+    25         177          1080.17              1         0.0009  
+    26         182          1080.17              1       0.000488  
+
+Computing finite-difference Hessian using objective function.
+
+Local minimum found.
+
+Optimization completed because the size of the gradient is less than
+the default value of the optimality tolerance.
+
+<stopping criteria details>
+\end{matlaboutput}
+\begin{matlabcode}
+lognorm_CA=exp(x_CA);
+lambda_lognorm_CA=lognorm_CA(1,1);
+eta_lognorm_CA=lognorm_CA(1,2);
+sigma_lognorm_CA=lognorm_CA(1,3);
+mu_lognorm_CA=lognorm_CA(1,4);
+
+hessian;
+inv_hessian = inv(hessian);
+err = sqrt(diag(inv(hessian)));
+%standard errors estimate 
+se_lognorm_CA = 0;
+se_lognorm_CA(1)=sqrt((lambda_lognorm_CA^2)*(err(1)));
+se_lognorm_CA(2)=sqrt((eta_lognorm_CA^2)*(err(2)));
+se_lognorm_CA(3)=sqrt((sigma_lognorm_CA^2)*(err(3)));
+se_lognorm_CA(4)=sqrt((mu_lognorm_CA^2)*(err(4)));
+
+%Recovering b
+rho=0.005;
+N_int=Inf;
+dens_ln_CA=@(z)normpdf((log(z)-mu_lognorm_CA)/sigma_lognorm_CA).*(1./(sigma_lognorm_CA.*z));
+f_lognorm_CA=@(z)(-w_star_CA+z).*dens_ln_CA(z);
+int_lognorm_CA=integral(f_lognorm_CA,w_star_CA,N_int);
+b_lognorm_CA=w_star_CA -(lambda_lognorm_CA/(rho+eta_lognorm_CA))*int_lognorm_CA;
+
+%%Exponential distribution
+y0=[-0.1,-1,1]; %starting guess
+%y(1) is log(lambda); y(2) is log(eta) and y(3) is log(alpha)
+options=optimoptions(@fminunc,'Algorithm','quasi-newton');
+options.Display='iter';
+f_real=@(y_CA)objfun2(y_CA,we_CA,N_CA,Nu_CA,tu_CA,w_star_CA);
+[y_CA,fval,exitflag,output, grad, hessian] = fminunc(f_real,y0,options);
+\end{matlabcode}
+\begin{matlaboutput}
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0           4          41808.6                      4.73e+04
+     1           8          15071.8    2.11206e-05        1.5e+04  
+     2          12          9487.61              1       8.79e+03  
+     3          16          5398.81              1       2.84e+03  
+     4          20          4623.62              1            875  
+     5          24          4469.66              1            455  
+     6          28          4443.36              1            388  
+     7          32          4432.27              1            355  
+     8          36          4408.14              1            386  
+     9          40          4359.98              1            543  
+    10          44          4266.76              1            661  
+    11          48          4120.39              1            495  
+    12          52          4080.14              1            109  
+    13          56          4074.79              1           76.6  
+    14          60          4074.09              1           63.4  
+    15          64           4073.6              1           45.1  
+    16          68          4073.45              1           42.1  
+    17          72          4072.15              1           52.7  
+    18          76          4069.98              1           79.2  
+    19          80          4065.07              1            103  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    20          84          4059.08              1           92.6  
+    21          88          4055.37              1           51.1  
+    22          92          4054.54              1           17.7  
+    23          96          4054.45              1           2.93  
+    24         100          4054.44              1           0.18  
+    25         104          4054.44              1         0.0162  
+
+Computing finite-difference Hessian using objective function.
+
+Local minimum found.
+
+Optimization completed because the size of the gradient is less than
+the default value of the optimality tolerance.
+
+<stopping criteria details>
+\end{matlaboutput}
+\begin{matlabcode}
+negexp_CA=exp(y_CA);
+lambda_exp_CA=negexp_CA(1,1);
+eta_exp_CA=negexp_CA(1,2);
+alpha_exp_CA=negexp_CA(1,3);
+
+hessian;
+inv_hessian = inv(hessian);
+err = sqrt(diag(inv(hessian)));
+%standard errors
+se_negexp_CA = 0;
+%lambda/eta/alpha
+se_negexp_CA(1)=sqrt((lambda_exp_CA^2)*(err(1)));
+se_negexp_CA(2)=sqrt((eta_exp_CA^2)*(err(2)));
+se_negexp_CA(3)=sqrt((alpha_exp_CA^2)*(err(3)));
+
+%Recovering b
+rho=0.005;
+f_exp_CA=@(z)(z-w_star_CA).*exppdf(z,(1/alpha_exp_CA));
+int_exp_CA=integral(f_exp_CA,w_star_CA,N_int);
+b_exp_CA=w_star_CA -(lambda_exp_CA/(rho+eta_exp_CA))*int_exp_CA;
+
+%%%%2%%%%
+%%%TX
+%New reservation wages
+%%Lognormal distribution
+y=[];
+z=[];
+i=0;
+x=(0:0.01:100);
+for x2=0:0.01:100
+    i=i+1;
+    y(i)=integral(@(z)(-x2+z).*dens_ln_TX(z),x2,Inf);
+    z(i)=(x2-b_lognorm_TX)*(rho+eta_lognorm_TX)/(1.1*lambda_lognorm_TX);
+end
+varI=0;
+[varM,varI]=min(abs(y-z));
+w_star_TX_new_ln=x(varI);
+
+%%Exponential distribution
+y=[];
+z=[];
+i=0;
+x=(0:0.01:100);
+for x2=0:0.01:100
+    i=i+1;
+    y(i)=integral(@(z)(-x2+z).*exppdf(z,(1/alpha_exp_TX)),x2,Inf);
+    z(i)=(x2-b_exp_TX)*(rho+eta_exp_TX)/(1.1*lambda_exp_TX);
+end
+varI=0;
+[varM,varI]=min(abs(y-z));
+w_star_TX_new_exp=x(varI);
+
+%%Exected duration of search
+%%Lognormal distribution
+eds_TX_ln=1/(lambda_lognorm_TX*(1-normcdf(log(w_star_TX),mu_lognorm_TX,sigma_lognorm_TX)));
+eds_TX_ln_new=1/((1.1*lambda_lognorm_TX)*(1-normcdf(log(w_star_TX_newa),mu_lognorm_TX,sigma_lognorm_TX)));
+%%Exponential distribution
+eds_TX_exp=1/(lambda_exp_TX*(1-expcdf(w_star_TX,(1/alpha_exp_TX))));
+eds_TX_exp_new=1/((1.1*lambda_exp_TX)*(1-expcdf(w_star_TX_newb,(1/alpha_exp_TX))));
+
+%%Mean accepted wage offer
+%%Lognormal distribution
+dens_ln_TX=@(z)normpdf((log(z)-mu_lognorm_TX)/sigma_lognorm_TX).*(1./(sigma_lognorm_TX.*z));
+dist_aw_TX_ln= @(z)z.*dens_ln_TX(z)./(1-normcdf(log(w_star_TX),mu_lognorm_TX,sigma_lognorm_TX));
+mean_aw_TX_ln=integral(dist_aw1_TX1,w_star_TX, N_int);
+dist_aw_TX_ln_new= @(z)z.*dens_ln_TX(z)./(1-normcdf(log(w_star_TX_new_ln),mu_lognorm_TX,sigma_lognorm_TX));
+mean_aw_TX_ln_new=integral(dist_aw1_TX2,w_star_TX_new_ln, N_int);
+%%Exponential distribution
+dist_aw_TX_exp= @(z)z.*exppdf(z,(1/alpha_exp_TX))./(1-expcdf(w_star_TX,(1/alpha_exp_TX)));
+mean_aw_TX_exp=integral(dist_aw2_TX1,w_star_TX, N_int);
+dist_aw_TX_exp_new= @(z)z.*exppdf(z,(1/alpha_exp_TX))./(1-expcdf(w_star_TX_new_exp,(1/alpha_exp_TX)));
+mean_aw_TX_exp_new=integral(dist_aw_TX_exp_new,w_star_TX_new_exp, N_int);
+
+%%%California 
+%New reservation wages
+%%Lognormal distribution
+y=[];
+z=[];
+i=0;
+x=(0:0.01:100);
+for x2=0:0.01:100
+    i=i+1;
+    y(i)=integral(@(z)(-x2+z).*dens_ln_CA(z),x2,Inf);
+    z(i)=(x2-b_lognorm_CA)*(rho+eta_lognorm_CA)/(1.1*lambda_lognorm_CA);
+end
+varI=0;
+[varM,varI]=min(abs(y-z));
+w_star_CA_new_ln=x(varI)
+\end{matlabcode}
+\begin{matlaboutput}
+w_star_CA_new_ln = 8.3000
+\end{matlaboutput}
+\begin{matlabcode}
+%%Exponential distribution
+y=[];
+z=[];
+i=0;
+x=(0:0.01:100);
+for x2=0:0.01:100
+    i=i+1;
+    y(i)=integral(@(z)(-x2+z).*exppdf(z,(1/alpha_exp_CA)),x2,Inf);
+    z(i)=(x2-b_exp_CA)*(rho+eta_exp_CA)/(1.1*lambda_exp_CA);
+end
+varI=0;
+[varM,varI]=min(abs(y-z));
+w_star_CA_new_exp=x(varI)
+\end{matlabcode}
+\begin{matlaboutput}
+w_star_CA_new_exp = 8.2900
+\end{matlaboutput}
+\begin{matlabcode}
+%%Exected duration of search
+%%Lognormal distribution
+eds_CA_ln=1/(lambda_lognorm_CA*(1-normcdf(log(w_star_CA),mu_lognorm_CA,sigma_lognorm_CA)));
+eds_CA_ln_new=1/((1.1*lambda_lognorm_CA)*(1-normcdf(log(w_star_CA_new_ln),mu_lognorm_CA,sigma_lognorm_CA)));
+%%Exponential distribution
+eds_CA_exp=1/(lambda_exp_CA*(1-expcdf(w_star_CA,(1/alpha_exp_CA))));
+eds_CA_exp_new=1/((1.1*lambda_exp_CA)*(1-expcdf(w_star_CA_new_exp,(1/alpha_exp_CA))));
+
+%%Mean accepted wage offer
+%%Lognormal distribution
+dens_ln_CA=@(z)normpdf((log(z)-mu_lognorm_CA)/sigma_lognorm_CA).*(1./(sigma_lognorm_CA.*z));
+dist_aw_CA_ln= @(z)z.*dens_ln_CA(z)./(1-normcdf(log(w_star_CA),mu_lognorm_CA,sigma_lognorm_CA));
+mean_aw_CA_ln=integral(dist_aw_CA_ln,w_star_CA,N_int);
+dist_aw_CA_ln_new= @(z)z.*dens_ln_CA(z)./(1-normcdf(log(w_star_CA_new_ln),mu_lognorm_CA,sigma_lognorm_CA));
+mean_aw_CA_ln_new=integral(dist_aw_CA_ln_new,w_star_CA_new_ln, N_int);
+%%Exponential distribution
+dist_aw_CA_exp= @(z)z.*exppdf(z,(1/alpha_exp_CA))./(1-expcdf(w_star_CA,(1/alpha_exp_CA)));
+mean_aw_CA_exp=integral(dist_aw_CA_exp,w_star_CA, N_int);
+dist_aw_CA_exp_new= @(z)z.*exppdf(z,(1/alpha_exp_CA))./(1-expcdf(w_star_CA_new_exp,(1/alpha_exp_CA)));
+mean_aw_CA_exp_new=integral(dist_aw_CA_exp_new,w_star_CA_new_exp, N_int);
+
+%%%%3%%%%
+%Restricted
+F_star_TX= 1-normcdf(log(w_star_TX),exp(x_TX(1,4)),exp(x_TX(1,3)));
+f_TX= normpdf(log(we_TX),exp(x_TX(1,4)),exp(x_TX(1,3)));
+L_TX= (N_TX*x_TX(1,1))+(Nu_TX*x_TX(1,2))+(Nu_TX*log(F_star_TX))-(exp(x_TX(1,1))*(F_star_TX)*tu_TX)-(N_TX*log(exp(x_TX(1,2))+exp(x_TX(1,1))*(F_star_TX)))+(sum(log(f_TX)));
+
+F_star_CA= 1-normcdf(log(w_star_CA),exp(x_CA(1,4)),exp(x_CA(1,3)));
+f_CA= normpdf(log(we_CA),exp(x_CA(1,4)),exp(x_CA(1,3)));
+L_CA= (N_CA*x_CA(1,1))+(Nu_CA*x_CA(1,2))+(Nu_CA*log(F_star_CA))-(exp(x_CA(1,1))*(F_star_CA)*tu_CA)-(N_CA*log(exp(x_CA(1,2))+exp(x_CA(1,1))*(F_star_CA)))+(sum(log(f_CA)));
+L_restricted=L_TX+L_CA;
+
+%Unrestricted
+%%Lognormal distribution
+x0=[-0.5,-1,2,1]; %starting guess
+%x(1) is log(lambda); x(2) is log(eta); x(3) is log(sigma^2) and x(4) is
+%log(mu)
+options=optimoptions(@fminunc,'Algorithm','quasi-newton');
+options.Display='iter';
+f_real=@(x_all)objfun(x_all,we,N,Nu,tu,w_star);
+[x_all,fval,exitflag,output] = fminunc(f_real,x0,options);
+\end{matlabcode}
+\begin{matlaboutput}
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0           5          7295.21                      1.93e+03
+     1          10          4805.18     0.00051836       1.85e+03  
+Objective function returned Inf; trying a new point...
+     2          28          2401.23       0.101563            991  
+     3          43          2257.45       0.161195            640  
+     4          48          2180.88              1            225  
+     5          53          2153.92              1            170  
+     6          58          2119.31              1            200  
+     7          63           2057.7              1            163  
+     8          68          2046.36              1            114  
+     9          73          2041.51              1           77.7  
+    10          78          2036.02              1           68.6  
+    11          83           2023.8              1            142  
+    12          93          2005.03            0.5            372  
+    13         103          1993.22            0.5            451  
+    14         108          1952.08              1            651  
+    15         118          1935.65       0.331666            416  
+    16         123          1926.84              1           81.4  
+    17         128             1926              1           30.1  
+    18         133          1925.96              1           2.81  
+    19         138          1925.95              1          0.305  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    20         143          1925.95              1          0.103  
+    21         148          1925.95              1        0.00726  
+    22         153          1925.95              1       0.000336  
+
+Local minimum found.
+
+Optimization completed because the size of the gradient is less than
+the default value of the optimality tolerance.
+
+<stopping criteria details>
+\end{matlaboutput}
+\begin{matlabcode}
+F_star= 1-normcdf(log(w_star),exp(x_all(1,4)),exp(x_all(1,3)));
+f_all= normpdf(log(we),exp(x_all(1,4)),exp(x_all(1,3)));
+L_unrestricted= (N*x_all(1,1))+(Nu*x_all(1,2))+(Nu*log(F_star))-(exp(x_all(1,1))*(F_star)*tu)-(N*log(exp(x_all(1,2))+exp(x_all(1,1))*(F_star)))+(sum(log(f_all)));
+%LRT
+LRT=2*(L_restricted-L_unrestricted);
+%Tables
+%Question #1
+%Table for Texas
+%lambda, eta, alpha 
+Q1TX1=[negexp_TX,se_negexp_TX,b_exp_TX]
+\end{matlabcode}
+\begin{matlaboutput}
+Q1TX1 = 1x7    
+    1.2744    0.0312    0.2382    0.4310    0.0118    0.0448  -20.8961
+
+\end{matlaboutput}
+\begin{matlabcode}
+%lambda, eta, sigma, mu 
+Q1TX2=[lognorm_TX,se_lognorm_TX,b_lognorm_TX]
+\end{matlabcode}
+\begin{matlaboutput}
+Q1TX2 = 1x9    
+    0.3333    0.0312    0.4046    2.1835    0.1119    0.0118    0.0929    0.2854  -20.9659
+
+\end{matlaboutput}
+\begin{matlabcode}
+%Table for California
+%lambda, eta, alpha 
+Q1CA1=[negexp_CA,se_negexp_CA,b_exp_CA]
+\end{matlabcode}
+\begin{matlaboutput}
+Q1CA1 = 1x7    
+    1.8149    0.0385    0.2696    0.5462    0.0121    0.0455   -9.8954
+
+\end{matlaboutput}
+\begin{matlabcode}
+%lambda, eta, sigma, mu 
+Q1CA2=[lognorm_CA,se_lognorm_CA,b_lognorm_CA]
+\end{matlabcode}
+\begin{matlaboutput}
+Q1CA2 = 1x9    
+    0.7735    0.0385    0.5544    1.7420    0.3869    0.0121    0.1544    0.4844  -10.0191
+
+\end{matlaboutput}
+\begin{matlabcode}
+
+%Question #2
+Q2TX1=[w_star_TX_new_ln,w_star_TX_new_exp,eds_TX_ln,eds_TX_ln_new,eds_TX_exp,eds_TX_exp_new]
+\end{matlabcode}
+\begin{matlaboutput}
+Q2TX1 = 1x6    
+    7.3500    7.3500    4.1586    4.0134    4.1586    4.1093
+
+\end{matlaboutput}
+\begin{matlabcode}
+Q2TX2=[mean_aw_TX_ln,mean_aw_TX_ln_new,mean_aw_TX_exp,mean_aw_TX_exp_new]
+\end{matlabcode}
+\begin{matlaboutput}
+Q2TX2 = 1x4    
+   11.2080   11.4564   11.1975   11.5475
+
+\end{matlaboutput}
+\begin{matlabcode}
+Q2CA1=[w_star_CA_new_ln,w_star_CA_new_exp,eds_CA_ln,eds_CA_ln_new,eds_CA_exp,eds_CA_exp_new]
+\end{matlabcode}
+\begin{matlaboutput}
+Q2CA1 = 1x6    
+    8.3000    8.2900    4.7638    4.7044    4.7639    4.6830
+
+\end{matlaboutput}
+\begin{matlabcode}
+Q2CA2=[mean_aw_CA_ln,mean_aw_CA_ln_new,mean_aw_CA_exp,mean_aw_CA_exp_new]
+\end{matlabcode}
+\begin{matlaboutput}
+Q2CA2 = 1x4    
+   11.7346   12.0441   11.7087   11.9987
+
+\end{matlaboutput}
+\begin{matlabcode}
+
+%Question #3
+LRT
+\end{matlabcode}
+\begin{matlaboutput}
+LRT = 459.7386
+\end{matlaboutput}
+
+\end{document}
