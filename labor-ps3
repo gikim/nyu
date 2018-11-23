@@ -2,7 +2,6 @@
 data <- read.table("C:/Users/gkim/Documents/GKIM/gk1512/cw/house_hours.txt", sep="\t", header=FALSE)
 n_r <- nrow(data)
 
-
 # gauss code from professor
 
 closeall
@@ -90,14 +89,8 @@ h_1 = mc_data[.,1];w_1=mc_data[.,2];h_2=mc_data[.,3];w_2=mc_data[.,4];y=mc_data[
 n_sims = 100;
 
 /* draw random numbers eps_1 and eps_2 from standard normal 
-use hte same n_sims draws for all households */
+use the same n_sims draws for all households */
 { eps, newstate } = rndn(n_sims,2,-45800321);
 
 /* form sample moments */ 
 real_m = h_1 ~ h_2 ~ (h_1-meanc(h_1))^2 ~ (h_2-meanc(h_2))^2 ~ h_1.*w_1 ~ h_2.*w_2 ~ h_1.*w_2~h_2.*w_1~h_1.
-
-
-
-
-  
-
