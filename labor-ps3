@@ -94,3 +94,28 @@ use the same n_sims draws for all households */
 
 /* form sample moments */ 
 real_m = h_1 ~ h_2 ~ (h_1-meanc(h_1))^2 ~ (h_2-meanc(h_2))^2 ~ h_1.*w_1 ~ h_2.*w_2 ~ h_1.*w_2~h_2.*w_1~h_1.
+
+m_fit
+meanc(h_1.*y) | meanc(h_2.*y);
+print "************************************************************";
+print "means and covariances of sample characteristics"; 
+print m_fit;
+
+covvar = varcovx(real_m);
+print covvar; 
+/* form weighting matrix */ 
+wt_vec = 1 / diag(covvar); 
+wt_mat = diagrv(zeros(1010), wt_vec); 
+
+m_sim = 0; 
+lambda_1 = 0; 
+lambda_2 = 0; 
+
+proc sim_est(b);
+local 
+mu_1, mu_2, sigma_1, sigma_2, rho, v_1, v_2,@lambda_1,lambda_2, @data_mat,ii,jj, hi_hat, h2_hat,
+sim_h_1, sim_w_1,sim_h_2,sim_w_2,
+
+
+
+
