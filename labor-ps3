@@ -114,8 +114,31 @@ lambda_2 = 0;
 proc sim_est(b);
 local 
 mu_1, mu_2, sigma_1, sigma_2, rho, v_1, v_2,@lambda_1,lambda_2, @data_mat,ii,jj, hi_hat, h2_hat,
-sim_h_1, sim_w_1,sim_h_2,sim_w_2,
+sim_h_1, sim_w_1,sim_h_2,sim_w_2,sim_y, obj_value; 
+mu_1 = b[1];
+mu_2 = b[2];
+sigma_1 = exp(b[3]);
+sigma_2 = exp(b[4]);
+rho = tanh(b[5]);
+v_1 = sigma_1*eps[.,1]+mu_1;
+v_2 = sigma_2*(rho*[eps[.,1]+sqrt(1-rho^2)*eps[.,2]+mu_2;
+lambda_1=exp(v_1)./(1-exp(v_1);
+lambda_2=exp(v_2)./(1-exp(v_2);
+data_mat=zeros(n_sims*n_r,5);
+ii=2; 
+do until ii gt 823; 
+  jj=1; 
+  do until jj gt n_sims; 
+    {h1_hat,h2_hat}=nash_solve(lambda_1[jj], 
+
+z1 = sigma1*eps_sim[.,1]+mu1;
+z2 = sigma2*(rho*eps_sim[.,1]+sqrt(1-rho^2)*eps_sim[.,2])+mu2;
+lambda1=exp(z1)./(1+exp(z1));
+lambda2=exp(z2)./(1+exp(z2));
 
 
 
-
+library(babynames)
+ls("package:babynames")
+library(GNU)
+ls("package:GNU")
