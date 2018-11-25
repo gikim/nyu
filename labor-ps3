@@ -6,17 +6,14 @@ n_r <- nrow(data)
 
 closeall
 output file = Labor_1_assignment_3.out reset; 
-library pgraph, (rho*optmum;
+library pgraph,optmum;
 optset; 
 _output = 0;
 
 /* read data */
-
 load x[823,5]=
 n_r=rows(x);
-
 meanc(x);
-
 cap_t = 112; 
 
 /*generate lambda values */ 
@@ -25,7 +22,7 @@ mu2 = -1.2;
 sigma1 = .2;
 sigma2 = .3; 
 rho=.5; 
-{ eps_sim,newstate_sim}=rndn(n_r,2,1009967);
+{eps_sim,newstate_sim}=rndn(n_r,2,1009967);
 
 z1 = sigma1*eps_sim[.,1]+mu1;
 z2 = sigma2*(rho*eps_sim[.,1]+sqrt(1-rho^2)*eps_sim[.,2])+mu2;
