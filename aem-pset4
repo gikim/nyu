@@ -1,0 +1,276 @@
+**************************************
+*AEM-P4-gk1512-dofile
+*Grace Kim
+**************************************
+clear all 
+*install packages
+ssc install nnmatch, replace
+ssc install psmatch2, replace
+ssc install treatrew, replace
+*set working directory
+*location: laptop
+*cd D:\GIKIM\AEM\PROBLEM-SETS\PS4\
+*use nsw_dw.dta, clear
+*location: desktop
+cd C:\Users\gk1512\Documents\GK1512\AEM\ps4\
+use "C:\Users\gk1512\Documents\GK1512\AEM\ps4\nsw_dw.dta" 
+
+**************************************
+**************************************
+**************************************
+*RUN DO FILE FROM HERE
+*log-file 
+log using aem-ps4-gk1512-log, replace
+**************************************
+*Generate new variables 
+encode data_id, gen(data)
+tab data_id
+tab data
+tab data if data_id == "PSID"
+*PSID comparison group 
+capture drop psid
+gen psid = 1 if data_id == "PSID"
+replace psid = 0 if psid == .
+tab psid
+*Variable for constructed treatment/control groups
+capture drop treat2
+gen treat2 = 0 if psid == 1
+replace treat2 = 1 if treat == 1
+tab treat2
+*new var
+*re-square
+capture drop re74sq
+gen re74sq = re74^2
+capture drop re75sq
+gen re75sq = re75^2
+*uniform
+gen random = runiform()
+*sort random
+*education - shorten variable name 
+gen ed = education
+*check
+ttest ed == education 
+save ps4.dta, replace
+**************************************
+*Part I: Q1
+* Table: 
+* (1) & (2) re74 group, treatment vs. control 
+* (3) PSID
+
+putexcel set ps4.xlsx, sheet("Q1")
+putexcel A1="Variable"
+
+putexcel B1="(1) RE74 Sample, Treatment (T)" 
+putexcel B2="Count"
+putexcel C2="Mean"
+putexcel D2="SD"
+
+putexcel E1="(2) RE74 Sample, Control (C)"
+putexcel E2="Count"
+putexcel F2="Mean"
+putexcel G2="SD"
+
+putexcel H1="(3) PSID, Control"
+putexcel H2="Count"
+putexcel I2="Mean"
+putexcel J2="SD"
+
+putexcel K1="(4) RE74, T vs. C"
+putexcel K2="Difference"
+putexcel L2="SE"
+putexcel M2="P-Value"
+
+putexcel N1="(5) RE74 Treated vs. PSID"
+putexcel N2="Difference"
+putexcel O2="SE"
+putexcel P2="P-Value"
+
+putexcel Q1="(6) All Observations"
+putexcel Q2="Count"
+putexcel R2="Mean"
+putexcel S2="SD"
+
+local row=3
+foreach x in age ed black hispanic married nodegree{
+putexcel A`row'="`x'"
+
+quietly ttest `x' if data_id != "PSID", by(treat)
+matrix a`x'= (r(N_2), r(mu_2), r(sd_2), r(N_1), r(mu_1), r(sd_1))
+putexcel B`row'=matrix(a`x')
+matrix a`x'= ((r(mu_2)-r(mu_1)), r(se), r(p))
+putexcel K`row'=matrix(a`x')
+
+quietly ttest `x', by(treat2)
+matrix a`x'= (r(N_1), r(mu_1), r(sd_1))
+putexcel H`row'=matrix(a`x')
+matrix a`x'= ((r(mu_2)-r(mu_1)), r(se), r(p))
+putexcel N`row'=matrix(a`x')
+
+quietly sum `x'
+matrix a`x'=((r(N)), (r(mean)), (r(sd)))
+putexcel Q`row'=matrix(a`x')
+local ++row
+}
+
+*Q2
+use ps4.dta, clear
+*Direct matching: Use nnmatch to match RE74 treated group to the PSID comparison group. 
+
+nnmatch re78 treat2 re74 re75, m(1) met(maha) tc(att) keep(match2) robust(1) pop replace
+use match2.dta, clear
+keep if treat2 == 1
+*list id index treat2
+collapse treat2 re78 re74 re75 km km_prime index dist re78_0 re78_1 re74_0m re75_0m re74_1m re75_1m, by(id)
+save match2-1.dta, replace
+*185 observations
+use match2-1.dta, clear
+ttest re78_1==re78_0
+
+twoway (scatter re74_0m re74_1m, sort)
+graph save Graph "2-2-74.gph", replace
+
+twoway (scatter re75_0m re75_1m, sort)
+graph save Graph "2-2-75.gph", replace
+
+*Q3. Match on education. 
+use ps4.dta, clear
+nnmatch education treat2 re74 re75, m(1) met(maha) tc(att) keep(match3) robust(1) pop replace
+*PATE: -2.191687 (.6143019)
+
+use match3.dta, clear
+keep if treat2 == 1
+collapse treat2 education re74 re75 km km_prime index dist education_0 education_1 re74_0m re75_0m re74_1m re75_1m, by(id)
+*list id index treat2
+save match3.dta, replace
+*balance on covariates 
+use match3.dta, clear
+ttest education_0 == education_1
+*graphs
+twoway (scatter re74_0m re74_1m, sort)
+graph save Graph "2-3-74.gph", replace
+twoway (scatter re75_0m re75_1m, sort)
+graph save Graph "2-3-75.gph", replace
+graph combine 2-2-74.gph 2-2-75.gph 2-3-74.gph 2-3-75.gph, col(2) row(2)
+graph export "2-2-3.png", as(png) replace
+
+*Q4. Redo with covariates. 
+use ps4.dta, clear
+nnmatch re78 treat2 ed black hispanic married re74 re75 re74sq re75sq, m(1) met(maha) tc(att) keep(match4) robust(1) pop replace
+use match4.dta
+keep if treat2 == 1
+*list id index treat2
+collapse treat2 re78 ed black hispanic married re74 re75 re74sq re75sq km km_prime index dist re78_0 re78_1 ed_0m black_0m hispanic_0m married_0m re74_0m re75_0m re74sq_0m re75sq_0m ed_1m black_1m hispanic_1m married_1m re74_1m re75_1m re74sq_1m re75sq_1m, by(id)
+save match4-1.dta, replace
+ttest re78_0==re78_1
+
+set graphics off
+foreach x in ed black hispanic married re74 re75 re74sq re75sq{
+twoway (scatter `x'_0m `x'_1m, sort)
+graph save Graph "2-4-`x'.gph", replace
+}
+
+set graphics on
+
+graph combine 2-4-ed.gph 2-4-black.gph 2-4-hispanic.gph 2-4-married.gph 2-4-re74.gph 2-4-re75.gph 2-4-re74sq.gph 2-4-re75sq.gph, col(3) row(3)
+graph save Graph "2-4.gph", replace
+graph export "2-4.png", as(png) replace
+
+*Compare with treatment effect from experimental treatment and control group. 
+use ps4.dta, clear
+nnmatch re78 treat ed black hispanic married re74 re75 re74sq re75sq if data_id != "PSID", m(1) met(maha) tc(att) keep(match4-exp) robust(1) pop replace
+use match4-exp.dta, clear
+keep if treat == 1
+*list id index treat2
+collapse treat re78 ed black hispanic married re74 re75 re74sq re75sq km km_prime index dist re78_0 re78_1 ed_0m black_0m hispanic_0m married_0m re74_0m re75_0m re74sq_0m re75sq_0m ed_1m black_1m hispanic_1m married_1m re74_1m re75_1m re74sq_1m re75sq_1m, by(id)
+save match4-exp1.dta, replace
+
+*Part II
+*Q5
+use ps4.dta, clear
+*Estimated treatment effect on nonexperimental group 
+psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq, outcome(re78) common
+pstest ed black hispanic married re74 re75 re74sq re75sq, treated(treat2) mw(_weight)
+pstest
+psgraph, treated(treat2) 
+*psgraph, treated(treat2) pscore(hispanic)
+graph save "2-5.gph", replace
+graph export "2-5.png", as(png) replace
+
+*psmatch to generate att/seatt
+bootstrap r(att) r(seatt), reps(10): psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq, outcome(re78) common
+
+
+*Q6. How does it compare to experimental treatment effect
+use ps4.dta, clear
+psmatch2 treat ed black hispanic married re74 re75 re74sq re75sq if data_id != "PSID", outcome(re78) ate common 
+pstest 
+psgraph
+graph export "2-6.png", as(png) replace
+
+*Q7.
+use ps4.dta, clear
+ttest ed, by(treat2)
+ttest ed if ed <9, by(treat2)
+
+*propensity score to balance the education covariate
+psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq if ed<9, outcome(re78) common
+pstest
+psgraph 
+graph export "2-7.png", as(png) replace
+
+*treatment effect in nonexeperimental group 
+psmatch2 treat ed black hispanic married re74 re75 re74sq re75sq if ed<9 & data_id != "PSID", outcome(re78) common
+pstest
+psgraph 
+graph export "2-7-exp.png", as(png) replace
+
+*Part III
+*Q8
+use ps4.dta, clear
+
+*compute treatment effect with inverse propensity score weighting formula: 
+use ps4.dta, clear
+psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq, outcome(re78) common
+gen att1 = 2675*re78*(treat-_pscore)/((1-_pscore)*185)
+sum att1
+gen att2 = (2675/185)*re78*((treat-_pscore)/(1-_pscore))
+sum att2
+save ps4-8.dta, replace
+
+*compute treatment effect with inverse propensity score weighting formula, simulate 
+capture program drop psw
+program psw, rclass
+use ps4.dta, clear
+psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq, outcome(re78) common
+gen att1 = 2675*re78*(treat-_pscore)/((1-_pscore)*185)
+sum att1
+return scalar mean = r(mean)
+return scalar sd=r(sd) 
+end
+
+simulate mean=r(mean) sd=r(sd), reps(10): psw
+sum *
+
+*Another student had done a regression with to calculate treatment effect with inverse inverse propensity score weighting, which Juan didn't really seem to trust, but it gives roughly the same results. 
+
+*regression with propensity score weighting. 
+use ps4.dta, clear
+psmatch2 treat2 ed black hispanic married re74 re75 re74sq re75sq, outcome(re78) common
+reg re78 treat2 ed black hispanic married re74 re75 re74sq re75sq [pweight=_pscore]
+di _b[treat2]
+
+*program to compute the treatment effect with a regression, with inverse propensity score weighting, with bootstrapped standard errors: 
+set seed 1234
+capture program drop psw
+use ps4.dta, clear
+program psw, rclass
+probit treat2 ed black hispanic married re74 re75 re74sq re75sq
+tempvar p
+predict `p'
+reg re78 treat2 ed black hispanic married re74 re75 re74sq re75sq [pweight=`p']
+end
+
+bootstrap _b[treat2], reps(50): psw
+
+log close 
+
